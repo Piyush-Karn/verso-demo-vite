@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchCities, type CitySummary } from '../../src/api/client';
+import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../src/api/client';
 import Badge from '../../src/components/Badge';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -10,6 +10,7 @@ import { getCachedImage } from '../../src/services/imageCache';
 import { getIconBase64 } from '../../src/services/iconProvider';
 import { CitiesMap, CitiesMapHandle } from '../../src/services/map';
 import { CITY_COORDS } from '../../src/services/geo';
+import Skeleton from '../../src/components/Skeleton';
 
 const themes = ['Foodie', 'Adventure', 'Culture', 'Nightlife'];
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -27,6 +28,12 @@ function getWeather(country: string | string[] | undefined, month: string | null
   return { kind: 'sunny' as const, tag: 'Ideal time to visit' };
 }
 
+function seasonOf(month: string, country: string) {
+  const rainy = getWeather(country, month)?.kind === 'rainy';
+  const shoulder = getWeather(country, month)?.kind === 'cloud';
+  return rainy ? 'rainy' : shoulder ? 'shoulder' : 'ideal';
+}
+
 export default function WithinCountry() {
   const { country } = useLocalSearchParams<{ country: string }>();
   const router = useRouter();
@@ -38,8 +45,8 @@ export default function WithinCountry() {
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
   const [cityImages, setCityImages] = useState<Record<string, string>>({});
   const [weatherIcon, setWeatherIcon] = useState<string | null>(null);
-  const [picked, setPicked] = useState<string | null>(null);
   const mapRef = useRef<CitiesMapHandle>(null);
+  const [inspirations, setInspirations] = useState<Inspiration[]>([]);
 
   useEffect(() => {
     if (!country) return;
@@ -48,20 +55,23 @@ export default function WithinCountry() {
         setLoading(true);
         const data = await fetchCities(String(country));
         setCities(data);
-        // Fetch only first 6 city images fast, then the rest lazily
+        // fetch first 6 images quickly
         const first = data.slice(0, 6);
         const rest = data.slice(6);
         const results = await Promise.all(first.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) })));
         const map: Record<string, string> = {};
         results.forEach((r) => { if (r.v) map[r.k] = r.v; });
         setCityImages(map);
-        // Lazy fetch remaining without blocking
+        // lazy fetch remaining
         setTimeout(async () => {
           const later = await Promise.all(rest.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) })));
           const extra: Record<string, string> = {};
           later.forEach((r) => { if (r.v) extra[r.k] = r.v; });
           setCityImages((prev) => ({ ...prev, ...extra }));
         }, 0);
+        // fetch inspirations list for contributors/count
+        const all = await Promise.all(data.map((c) => fetchCityItems(String(country), c.city)));
+        setInspirations(all.flat());
       } catch (e: any) {
         setError(e?.message || 'Failed to load');
       } finally {
@@ -88,9 +98,18 @@ export default function WithinCountry() {
     return coord ? { name: c.city, lng: coord[0], lat: coord[1] } : null;
   }).filter(Boolean) as Array<{ name: string; lng: number; lat: number }>;
 
-  const onCityCardPress = (name: string) => {
-    setPicked(name);
-    mapRef.current?.flyToCity(name);
+  const contributorNames = useMemo(() => {
+    const set = new Set<string>();
+    inspirations.forEach((i) => { if (i.added_by) set.add(i.added_by); });
+    return Array.from(set);
+  }, [inspirations]);
+
+  const totalCount = inspirations.length;
+
+  const onShare = async () => {
+    try {
+      await Share.share({ message: `Verso playlist · ${country}\n${totalCount} inspirations curated by ${contributorNames.slice(0,3).join(', ')}\nOpen Verso to explore.` });
+    } catch {}
   };
 
   return (
@@ -101,17 +120,30 @@ export default function WithinCountry() {
         <TouchableOpacity onPress={() => router.push('/organize/interests')}><Text style={styles.plan}>Your Interests</Text></TouchableOpacity>
       </View>
 
+      {/* Contributors / count / share */}
+      <View style={styles.statsRow}>
+        <Text style={styles.statsText}>{totalCount} inspirations</Text>
+        <View style={styles.avatars}>
+          {contributorNames.slice(0,3).map((n) => {
+            const label = (n.split('@')[0] || 'U').slice(0,2).toUpperCase();
+            return <View key={n} style={styles.avatar}><Text style={styles.avatarText}>{label}</Text></View>;
+          })}
+          {contributorNames.length > 3 && (
+            <View style={styles.avatar}><Text style={styles.avatarText}>+{contributorNames.length - 3}</Text></View>
+          )}
+        </View>
+        <TouchableOpacity onPress={onShare} style={styles.shareBtn}>
+          <Ionicons name="share-social-outline" size={16} color="#0b0b0b" />
+          <Text style={styles.shareText}>Share</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* City map (web: mapbox; native: placeholder) */}
       {cityPoints.length > 0 && (
         <View style={{ alignItems: 'center' }}>
-          <CitiesMap ref={mapRef} points={cityPoints} onSelect={setPicked} />
+          <CitiesMap ref={mapRef} points={cityPoints} onSelect={() => { /* no dynamic CTA here per requirement */ }} />
         </View>
       )}
-      {picked ? (
-        <View style={styles.ctaBar}>
-          <Text style={styles.ctaText}>Take me to {picked}</Text>
-          <TouchableOpacity onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(picked)}`)} style={styles.ctaBtn}><Text style={styles.ctaBtnText}>Go</Text></TouchableOpacity>
-        </View>
-      ) : null}
 
       {loading ? (
         <View style={styles.center}><ActivityIndicator color="#888" /></View>
@@ -144,31 +176,37 @@ export default function WithinCountry() {
             </ScrollView>
           )}
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            {months.map((m) => (
-              <TouchableOpacity key={m} onPress={() => setActiveMonth((prev) => (prev === m ? null : m))} style={[styles.chip, activeMonth === m && styles.chipActive]}>
-                <Text style={[styles.chipText, activeMonth === m && styles.chipTextActive]}>{m}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          {/* Best time calendar panel */}
+          <View style={styles.calendar}>
+            {months.map((m) => {
+              const tag = seasonOf(m, String(country));
+              return (
+                <View key={m} style={[styles.monthBox, tag === 'ideal' ? styles.monthIdeal : tag === 'shoulder' ? styles.monthShoulder : styles.monthRainy]}>
+                  <Text style={styles.monthText}>{m}</Text>
+                </View>
+              );
+            })}
+          </View>
 
           <View style={styles.legendRow}>
             <Ionicons name="sunny-outline" size={14} color="#e6e1d9" />
-            <Text style={styles.legendText}>Ideal time</Text>
+            <Text style={styles.legendText}>Ideal</Text>
             <Ionicons name="cloud-outline" size={14} color="#e6e1d9" style={{ marginLeft: 12 }} />
             <Text style={styles.legendText}>Shoulder</Text>
             <Ionicons name="rainy-outline" size={14} color="#e6e1d9" style={{ marginLeft: 12 }} />
             <Text style={styles.legendText}>Rainy</Text>
           </View>
 
-          <View className="grid" style={styles.grid}>
+          <View style={styles.grid}>
             {cities.map((c) => {
               const base64 = cityImages[c.city] || CITY_THUMBS[c.city];
               return (
-                <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => onCityCardPress(c.city)}>
+                <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(c.city)}`)}>
                   {base64 ? (
                     <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.cityThumb} contentFit="cover" />
-                  ) : null}
+                  ) : (
+                    <Skeleton style={styles.cityThumb} />
+                  )}
                   <View style={{ padding: 10 }}>
                     <Text style={styles.cityName}>{c.city}</Text>
                     <Text style={styles.cityMeta}>{c.count} saved</Text>
@@ -203,14 +241,19 @@ const styles = StyleSheet.create({
   cityThumb: { width: '100%', height: 96 },
   cityName: { color: '#fff', fontSize: 16, fontWeight: '600' },
   cityMeta: { color: '#9aa0a6', marginTop: 4 },
-  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
-  vibe: { color: '#e5e7eb', fontSize: 12 },
-  weatherRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 8 },
-  weatherText: { color: '#e5e7eb' },
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginVertical: 6 },
   legendText: { color: '#9aa0a6', marginLeft: 4 },
-  ctaBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 16, backgroundColor: '#141414', borderRadius: 12, padding: 12, marginTop: 8 },
-  ctaText: { color: '#e5e7eb' },
-  ctaBtn: { backgroundColor: '#e6e1d9', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
-  ctaBtnText: { color: '#0b0b0b', fontWeight: '700' },
+  statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 6 },
+  statsText: { color: '#e5e7eb', fontWeight: '600' },
+  avatars: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  avatar: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#e6e1d9', alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#0b0b0b', fontSize: 10, fontWeight: '700' },
+  shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e6e1d9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
+  shareText: { color: '#0b0b0b', fontWeight: '700' },
+  calendar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  monthBox: { width: '22%', aspectRatio: 1.6, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  monthIdeal: { backgroundColor: '#114b8a' },
+  monthShoulder: { backgroundColor: '#3b3b3b' },
+  monthRainy: { backgroundColor: '#1f2f4a' },
+  monthText: { color: '#e5e7eb', fontWeight: '600' },
 });

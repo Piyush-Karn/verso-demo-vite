@@ -5,13 +5,15 @@ import { fetchCityItems, type Inspiration } from '../../../src/api/client';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useInterests } from '../../../src/store/useInterests';
+import { getCachedImage } from '../../../src/services/imageCache';
 
 function enrich(it: Inspiration) {
-  // Derived details for richer card info (demo heuristics)
   const rating = 4.2 + (it.id.charCodeAt(0) % 8) / 10; // 4.2 - 4.9
   const duration = it.type === 'cafe' ? '45–90 min' : '2–3 hrs';
   const tags = it.theme?.length ? it.theme.join(' • ') : it.type === 'cafe' ? 'Coffee • Brunch' : 'Scenic • Local';
-  return { rating: rating.toFixed(1), duration, tags };
+  const neighborhood = it.city; // demo heuristic
+  const open = it.type === 'cafe' ? '8:00–22:00' : '6:00–18:00';
+  return { rating: rating.toFixed(1), duration, tags, neighborhood, open };
 }
 
 export default function CityDeepDive() {
@@ -65,7 +67,7 @@ export default function CityDeepDive() {
       ) : (
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={width} snapToAlignment="center">
           {items.map((it, idx) => (
-            <Card key={it.id} width={width} item={it} index={idx} onPress={() => setSheetItem(it)} onAdd={() => onAdd(it)} />
+            <Card key={it.id} width={width} item={it} index={idx} onPress={() => setSheetItem(it)} onAdd={() => onAdd(it)} country={String(country)} city={String(city)} />
           ))}
         </ScrollView>
       )}
@@ -75,21 +77,31 @@ export default function CityDeepDive() {
   );
 }
 
-function Card({ item, index, onPress, onAdd, width }: { item: Inspiration; index: number; onPress: () => void; onAdd: () => void; width: number }) {
+function Card({ item, index, onPress, onAdd, width, country, city }: { item: Inspiration; index: number; onPress: () => void; onAdd: () => void; width: number; country: string; city: string }) {
   const anim = useRef(new Animated.Value(0)).current;
+  const [photo, setPhoto] = useState<string | null>(null);
   useEffect(() => { Animated.timing(anim, { toValue: 1, duration: 420, delay: index * 60, useNativeDriver: true }).start(); }, [anim, index]);
+  useEffect(() => {
+    if (!item.image_base64) {
+      // Lazy image fetch per card for speed
+      getCachedImage(`${item.title || item.url} ${city} ${country}`)
+        .then((img) => { if (img) setPhoto(img); })
+        .catch(() => {});
+    }
+  }, [item.image_base64, item.title, item.url, city, country]);
   const ex = enrich(item);
+  const displayBase64 = item.image_base64 || photo || null;
+
   return (
     <Animated.View style={{ width, opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>
       <View style={styles.card}> 
-        {item.image_base64 ? (
-          <Image source={{ uri: `data:image/jpeg;base64,${item.image_base64}` }} style={styles.photo} contentFit="cover" />
+        {displayBase64 ? (
+          <Image source={{ uri: `data:image/jpeg;base64,${displayBase64}` }} style={styles.photo} contentFit="cover" />
         ) : (
           <View style={[styles.photo, { backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center' }]}>
-            <Text style={{ color: '#9aa0a6' }}>No image</Text>
+            <ActivityIndicator color="#9aa0a6" />
           </View>
         )}
-        {/* Rich summary overlay */}
         <View style={styles.metaOverlay}>
           <Text style={styles.placeName}>{item.title || item.url}</Text>
           <View style={styles.rowInline}>
@@ -100,6 +112,7 @@ function Card({ item, index, onPress, onAdd, width }: { item: Inspiration; index
             <Text style={styles.badgeText}>{item.cost_indicator || '$$'}</Text>
           </View>
           <Text style={styles.tagsText}>{ex.tags}</Text>
+          <Text style={styles.tagsText}>{ex.neighborhood} • Hours {ex.open}</Text>
         </View>
         <View style={styles.metaBar}>
           <TouchableOpacity style={styles.addBtn} onPress={onAdd}><Text style={styles.addText}>+ Add to Interests</Text></TouchableOpacity>

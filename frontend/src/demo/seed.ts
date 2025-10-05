@@ -1,6 +1,5 @@
 import { addInspiration, fetchCityItems } from '../api/client';
 import { CITY_THUMBS } from '../assets/imagesBase64';
-import { getCachedImage } from '../services/imageCache';
 
 const jpCities = ['Tokyo', 'Kyoto', 'Osaka', 'Sapporo', 'Okinawa'];
 const baliCities = ['Ubud', 'Kuta', 'Seminyak', 'Canggu', 'Uluwatu'];
@@ -14,15 +13,15 @@ function costFor(idx: number): '$' | '$$' | '$$$' {
 }
 
 async function ensureCity(country: string, city: string) {
-  // ensure 5 activities
+  // Quick, reliable seeding: do NOT fetch remote images here to keep first load fast.
+  // Images will be loaded lazily per-screen using Pexels/Unsplash and cached with TTL.
   const acts = await fetchCityItems(country, city, 'activity');
   for (let i = acts.length; i < 5; i++) {
     const title = `${city} · ${actTitles[i % actTitles.length]}`;
-    const img = (await getCachedImage(`${city} ${country} ${actTitles[i % actTitles.length]} scenic`)) || CITY_THUMBS[city];
     await addInspiration({
       url: `https://example.com/${country}/${city}/activity/${i}`,
       title,
-      image_base64: img,
+      image_base64: null, // lazy load later
       country,
       city,
       type: 'activity',
@@ -32,15 +31,13 @@ async function ensureCity(country: string, city: string) {
       added_by: 'demo-seed',
     });
   }
-  // ensure 5 cafes
   const cafes = await fetchCityItems(country, city, 'cafe');
   for (let i = cafes.length; i < 5; i++) {
     const title = `${city} · ${cafeTitles[i % cafeTitles.length]}`;
-    const img = (await getCachedImage(`${city} ${country} cafe ${cafeTitles[i % cafeTitles.length]} interior`)) || CITY_THUMBS[city];
     await addInspiration({
       url: `https://example.com/${country}/${city}/cafe/${i}`,
       title,
-      image_base64: img,
+      image_base64: null, // lazy load later
       country,
       city,
       type: 'cafe',

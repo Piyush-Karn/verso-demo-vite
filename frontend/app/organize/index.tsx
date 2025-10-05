@@ -7,11 +7,14 @@ import DemoMap, { MapHandle } from '../../src/services/map';
 import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../src/assets/imagesBase64';
 import { seedIfNeeded } from '../../src/demo/seed';
 import { getCachedImage } from '../../src/services/imageCache';
+import Skeleton from '../../src/components/Skeleton';
+import { useToast } from '../../src/store/useToast';
 
 const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
 
 export default function OrganizeHome() {
   const router = useRouter();
+  const { show } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [countries, setCountries] = useState<CountrySummary[]>([]);
@@ -51,13 +54,12 @@ export default function OrganizeHome() {
 
   const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
 
-  const onPick = (c: string) => { setPicked(c); };
+  const onPick = (c: string) => { setPicked(c); show(`Focused on ${c}`); mapRef.current?.flyToCountry(c); };
   const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}`); };
 
-  const onCardPress = (c: string) => {
-    setPicked(c);
-    mapRef.current?.flyToCountry(c);
-  };
+  const onCardPress = (c: string) => onPick(c);
+
+  const filtered = picked ? countries.filter((x) => x.country === picked) : countries;
 
   return (
     <View style={styles.container}>
@@ -73,13 +75,6 @@ export default function OrganizeHome() {
         <DemoMap ref={mapRef} countries={countryNames} onSelectCountry={onPick} />
       </View>
 
-      {picked ? (
-        <View style={styles.ctaBar}>
-          <Text style={styles.ctaText}>Take me to {picked}</Text>
-          <TouchableOpacity onPress={onNavigate} style={styles.ctaBtn}><Text style={styles.ctaBtnText}>Go</Text></TouchableOpacity>
-        </View>
-      ) : null}
-
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color="#888" />
@@ -90,11 +85,15 @@ export default function OrganizeHome() {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Text style={styles.sectionTitle}>Your Collections</Text>
-          {countries.map((c) => {
+          {filtered.map((c) => {
             const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
             return (
               <TouchableOpacity key={c.country} style={styles.card} onPress={() => onCardPress(c.country)}>
-                <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
+                {base64 ? (
+                  <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
+                ) : (
+                  <Skeleton style={styles.thumb} />
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>{c.country}</Text>
                   <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
@@ -106,9 +105,17 @@ export default function OrganizeHome() {
         </ScrollView>
       )}
 
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/add')}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      {picked ? (
+        <View style={styles.bigCtaBar}>
+          <TouchableOpacity style={styles.bigCtaBtn} onPress={onNavigate}>
+            <Text style={styles.bigCtaText}>Take me to {picked}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity style={styles.fab} onPress={() => router.push('/add')}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -125,14 +132,13 @@ const styles = StyleSheet.create({
   error: { color: '#ef4444' },
   sectionTitle: { color: '#e5e7eb', fontSize: 16, marginBottom: 8 },
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#141414', borderRadius: 16, padding: 12, marginBottom: 12, gap: 12 },
-  thumb: { width: 72, height: 72, borderRadius: 12, backgroundColor: '#1f2937' },
+  thumb: { width: 84, height: 84, borderRadius: 12, backgroundColor: '#1f2937' },
   cardTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
   cardMeta: { color: '#9aa0a6', marginTop: 4 },
   arrow: { color: '#9aa0a6', fontSize: 24 },
   fab: { position: 'absolute', right: 16, bottom: 24, width: 56, height: 56, backgroundColor: '#e6e1d9', borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
   fabText: { color: '#0b0b0b', fontSize: 28, fontWeight: '600' },
-  ctaBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 16, backgroundColor: '#141414', borderRadius: 12, padding: 12 },
-  ctaText: { color: '#e5e7eb' },
-  ctaBtn: { backgroundColor: '#e6e1d9', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
-  ctaBtnText: { color: '#0b0b0b', fontWeight: '700' },
+  bigCtaBar: { position: 'absolute', left: 16, right: 16, bottom: 16 },
+  bigCtaBtn: { backgroundColor: '#e6e1d9', height: 60, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  bigCtaText: { color: '#0b0b0b', fontWeight: '700', fontSize: 16 },
 });

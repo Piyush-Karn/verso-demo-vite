@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { HERO_TRAVEL } from '../src/assets/imagesBase64';
 
 export default function Landing() {
   const router = useRouter();
@@ -8,9 +9,9 @@ export default function Landing() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../assets/images/app-image.png')}
+        source={{ uri: `data:image/png;base64,${HERO_TRAVEL}` }}
         style={styles.bg}
-        imageStyle={{ opacity: 0.9 }}
+        imageStyle={{ opacity: 0.92 }}
       >
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.centerWrap}>

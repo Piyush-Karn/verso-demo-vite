@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/store/useAuth';
+import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../src/assets/imagesBase64';
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -18,6 +19,13 @@ export default function AuthScreen() {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.overlay} />
+
+        <View style={styles.thumbRow}>
+          <Image source={{ uri: `data:image/png;base64,${THUMB_JAPAN}` }} style={styles.thumb} />
+          <Image source={{ uri: `data:image/png;base64,${THUMB_BALI}` }} style={styles.thumb} />
+          <Image source={{ uri: `data:image/png;base64,${THUMB_GOA}` }} style={styles.thumb} />
+        </View>
+
         <View style={styles.sheet}>
           <Text style={styles.title}>Welcome to Verso</Text>
           <Text style={styles.body}>Sign in to see your organized collections and start planning.</Text>
@@ -55,6 +63,8 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000', justifyContent: 'flex-end' },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  thumbRow: { position: 'absolute', top: 80, width: '100%', flexDirection: 'row', justifyContent: 'center', gap: 12 },
+  thumb: { width: 64, height: 64, borderRadius: 12, marginHorizontal: 6 },
   sheet: {
     backgroundColor: 'rgba(16,16,16,0.75)',
     padding: 24,

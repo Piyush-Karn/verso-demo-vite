@@ -102,6 +102,7 @@ function Card({ item, index, onPress, onAdd, width }: { item: Inspiration; index
 
 function BottomSheet({ visible, onClose, item }: { visible: boolean; onClose: () => void; item: Inspiration | null }) {
   if (!item) return null;
+  const cafeExtra = item.type === 'cafe' ? `\nMenu: Signature lattes, pastries, light brunch\nTypical cost for two: ${item.cost_indicator || '$$'}` : '';
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -111,10 +112,7 @@ function BottomSheet({ visible, onClose, item }: { visible: boolean; onClose: ()
           <Text style={styles.sheetRow}>Typical cost: {item.cost_indicator || '$$'}</Text>
           <Text style={styles.sheetRow}>Crowd level: {item.vibe_notes || 'Varies by season'}</Text>
           <Text style={styles.sheetRow}>Best time: Ideal in spring and autumn</Text>
-          <Text style={styles.sheetRow}>User reviews: “Loved it”, “Worth the wait”, “Great vibe”</Text>
-          {item.type === 'cafe' ? (
-            <Text style={styles.sheetRow}>Menu: Signature lattes, pastries, light brunch</Text>
-          ) : null}
+          <Text style={styles.sheetRow}>User reviews: “Loved it”, “Worth the wait”, “Great vibe”{cafeExtra ? `\n${cafeExtra}` : ''}</Text>
           <TouchableOpacity style={styles.bookBtn}>
             <Text style={styles.bookText}>Book this {item.type}</Text>
           </TouchableOpacity>

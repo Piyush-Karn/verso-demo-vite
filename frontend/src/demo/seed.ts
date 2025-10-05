@@ -1,4 +1,4 @@
-import { addInspiration, fetchCountries } from '../api/client';
+import { addInspiration, fetchCityItems } from '../api/client';
 import { CITY_THUMBS } from '../assets/imagesBase64';
 import { getCachedImage } from '../services/imageCache';
 
@@ -13,60 +13,57 @@ function costFor(idx: number): '$' | '$$' | '$$$' {
   return (['$', '$$', '$$', '$', '$$$'] as const)[idx % 5];
 }
 
+async function ensureCity(country: string, city: string) {
+  // ensure 5 activities
+  const acts = await fetchCityItems(country, city, 'activity');
+  for (let i = acts.length; i < 5; i++) {
+    const title = `${city} · ${actTitles[i % actTitles.length]}`;
+    const img = (await getCachedImage(`${city} ${country} ${actTitles[i % actTitles.length]} scenic`)) || CITY_THUMBS[city];
+    await addInspiration({
+      url: `https://example.com/${country}/${city}/activity/${i}`,
+      title,
+      image_base64: img,
+      country,
+      city,
+      type: 'activity',
+      theme: ['Adventure'],
+      cost_indicator: costFor(i),
+      vibe_notes: i % 2 === 0 ? 'Usually crowded in May' : 'Calm mornings',
+      added_by: 'demo-seed',
+    });
+  }
+  // ensure 5 cafes
+  const cafes = await fetchCityItems(country, city, 'cafe');
+  for (let i = cafes.length; i < 5; i++) {
+    const title = `${city} · ${cafeTitles[i % cafeTitles.length]}`;
+    const img = (await getCachedImage(`${city} ${country} cafe ${cafeTitles[i % cafeTitles.length]} interior`)) || CITY_THUMBS[city];
+    await addInspiration({
+      url: `https://example.com/${country}/${city}/cafe/${i}`,
+      title,
+      image_base64: img,
+      country,
+      city,
+      type: 'cafe',
+      theme: ['Foodie'],
+      cost_indicator: costFor(i),
+      vibe_notes: i % 2 === 0 ? 'Usually crowded in evenings' : 'Cozy weekdays',
+      added_by: 'demo-seed',
+    });
+  }
+}
+
 export async function seedIfNeeded() {
   try {
-    const existing = await fetchCountries();
-    const haveJapan = existing.some((c) => c.country === 'Japan');
-    const haveBali = existing.some((c) => c.country === 'Bali');
-    const haveGoa = existing.some((c) => c.country === 'Goa');
+    const countries = [
+      { name: 'Japan', cities: jpCities },
+      { name: 'Bali', cities: baliCities },
+      { name: 'Goa', cities: goaCities },
+    ];
 
-    if (haveJapan && haveBali && haveGoa) return;
-
-    const doCity = async (country: string, city: string) => {
-      // 5 activities
-      for (let i = 0; i < 5; i++) {
-        const title = `${city} · ${actTitles[i]}`;
-        const img = (await getCachedImage(`${city} ${country} ${actTitles[i]} scenic`)) || CITY_THUMBS[city];
-        await addInspiration({
-          url: `https://example.com/${country}/${city}/activity/${i}`,
-          title,
-          image_base64: img,
-          country,
-          city,
-          type: 'activity',
-          theme: ['Adventure'],
-          cost_indicator: costFor(i),
-          vibe_notes: i % 2 === 0 ? 'Usually crowded in May' : 'Calm mornings',
-          added_by: 'demo-seed',
-        });
+    for (const c of countries) {
+      for (const city of c.cities) {
+        await ensureCity(c.name, city);
       }
-      // 5 cafes
-      for (let i = 0; i < 5; i++) {
-        const title = `${city} · ${cafeTitles[i]}`;
-        const img = (await getCachedImage(`${city} ${country} cafe ${cafeTitles[i]} interior`)) || CITY_THUMBS[city];
-        await addInspiration({
-          url: `https://example.com/${country}/${city}/cafe/${i}`,
-          title,
-          image_base64: img,
-          country,
-          city,
-          type: 'cafe',
-          theme: ['Foodie'],
-          cost_indicator: costFor(i),
-          vibe_notes: i % 2 === 0 ? 'Usually crowded in evenings' : 'Cozy weekdays',
-          added_by: 'demo-seed',
-        });
-      }
-    };
-
-    if (!haveJapan) {
-      for (const city of jpCities) await doCity('Japan', city);
-    }
-    if (!haveBali) {
-      for (const city of baliCities) await doCity('Bali', city);
-    }
-    if (!haveGoa) {
-      for (const city of goaCities) await doCity('Goa', city);
     }
   } catch (e) {
     // silent for demo

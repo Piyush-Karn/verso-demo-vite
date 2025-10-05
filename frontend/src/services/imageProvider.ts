@@ -7,7 +7,8 @@ async function fetchPexels(query: string): Promise<string | null> {
     });
     if (!res.ok) return null;
     const json = await res.json();
-    const url = json?.photos?.[0]?.src?.large || json?.photos?.[0]?.src?.original;
+    const src = json?.photos?.[0]?.src;
+    const url = src?.large2x || src?.large || src?.original;
     if (!url) return null;
     const img = await fetch(url);
     const blob = await img.blob();
@@ -24,7 +25,8 @@ async function fetchUnsplash(query: string): Promise<string | null> {
     const res = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&client_id=${clientId}`);
     if (!res.ok) return null;
     const json = await res.json();
-    const url = json?.results?.[0]?.urls?.regular || json?.results?.[0]?.urls?.full;
+    const urls = json?.results?.[0]?.urls;
+    const url = urls?.full || urls?.regular || urls?.small;
     if (!url) return null;
     const img = await fetch(url);
     const blob = await img.blob();

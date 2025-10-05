@@ -8,6 +8,26 @@ import { Ionicons } from '@expo/vector-icons';
 const themes = ['Foodie', 'Adventure', 'Culture', 'Nightlife'];
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+function getWeather(country: string | string[] | undefined, month: string | null) {
+  if (!month) return null;
+  const m = month;
+  // Demo mapping per country
+  const rainyMonths = {
+    Bali: ['Nov','Dec','Jan','Feb'],
+    Goa: ['Jun','Jul','Aug','Sep'],
+    Japan: ['Jun','Jul'],
+  } as Record<string, string[]>;
+  const shoulder = ['Mar','Apr','Oct','Nov'];
+
+  const c = Array.isArray(country) ? country[0] : country || 'General';
+  const isRain = rainyMonths[c]?.includes(m);
+  const isShoulder = shoulder.includes(m);
+
+  if (isRain) return { icon: 'rainy-outline' as const, tag: 'Rainy season' };
+  if (isShoulder) return { icon: 'cloud-outline' as const, tag: 'Shoulder season' };
+  return { icon: 'sunny-outline' as const, tag: 'Ideal time to visit' };
+}
+
 export default function WithinCountry() {
   const { country } = useLocalSearchParams<{ country: string }>();
   const router = useRouter();
@@ -15,6 +35,7 @@ export default function WithinCountry() {
   const [error, setError] = useState<string | null>(null);
   const [cities, setCities] = useState<CitySummary[]>([]);
   const [activeTheme, setActiveTheme] = useState<string | null>(null);
+  const [showThemePicker, setShowThemePicker] = useState(false);
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,12 +54,7 @@ export default function WithinCountry() {
     run();
   }, [country]);
 
-  const vibeForMonth = useMemo(() => {
-    if (!activeMonth) return null;
-    // Dummy logic: warm months are less crowded for demo
-    const warm = ['Mar','Apr','May','Sep','Oct'];
-    return warm.includes(activeMonth) ? 'Not Crowded' : 'Usually crowded';
-  }, [activeMonth]);
+  const weather = useMemo(() => getWeather(country, activeMonth), [country, activeMonth]);
 
   return (
     <View style={styles.container}>
@@ -56,8 +72,8 @@ export default function WithinCountry() {
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <View style={styles.filterRow}>
             <Text style={styles.filterActive}>City</Text>
-            <TouchableOpacity onPress={() => setActiveTheme(activeTheme ? null : 'Foodie')}>
-              <Text style={activeTheme ? styles.filterActive : styles.filter}>Theme</Text>
+            <TouchableOpacity onPress={() => setShowThemePicker((s) => !s)}>
+              <Text style={showThemePicker ? styles.filterActive : styles.filter}>Theme</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setActiveMonth(activeMonth ? null : 'May')}>
               <Text style={activeMonth ? styles.filterActive : styles.filter}>Date</Text>
@@ -67,17 +83,21 @@ export default function WithinCountry() {
           {/* Badges */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {activeTheme && <Badge label={`Theme: ${activeTheme}`} />}
-            {activeMonth && <Badge label={`Date: ${activeMonth}`} />} 
+            {activeMonth && weather && (
+              <Badge label={`${activeMonth} · ${weather.tag}`} />
+            )}
           </View>
 
-          {/* Theme quick picks (demo) */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }} contentContainerStyle={{ gap: 8 }}>
-            {themes.map((t) => (
-              <TouchableOpacity key={t} onPress={() => setActiveTheme((prev) => (prev === t ? null : t))} style={[styles.chip, activeTheme === t && styles.chipActive]}>
-                <Text style={[styles.chipText, activeTheme === t && styles.chipTextActive]}>{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          {/* Theme quick picks (hidden until Theme clicked) */}
+          {showThemePicker && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }} contentContainerStyle={{ gap: 8 }}>
+              {themes.map((t) => (
+                <TouchableOpacity key={t} onPress={() => setActiveTheme((prev) => (prev === t ? null : t))} style={[styles.chip, activeTheme === t && styles.chipActive]}>
+                  <Text style={[styles.chipText, activeTheme === t && styles.chipTextActive]}>{t}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
 
           {/* Month quick picks (demo) */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
@@ -88,15 +108,23 @@ export default function WithinCountry() {
             ))}
           </ScrollView>
 
+          {/* Weather guide row */}
+          {activeMonth && weather && (
+            <View style={styles.weatherRow}>
+              <Ionicons name={weather.icon} size={16} color="#e6e1d9" />
+              <Text style={styles.weatherText}>{weather.tag}</Text>
+            </View>
+          )}
+
           <View style={styles.grid}>
             {cities.map((c) => (
               <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(c.city)}`)}>
                 <Text style={styles.cityName}>{c.city}</Text>
                 <Text style={styles.cityMeta}>{c.count} saved</Text>
-                {activeMonth && (
+                {activeMonth && weather && (
                   <View style={styles.badgeRow}>
-                    <Ionicons name="sunny-outline" size={14} color="#e6e1d9" />
-                    <Text style={styles.vibe}>{vibeForMonth}</Text>
+                    <Ionicons name={weather.icon} size={14} color="#e6e1d9" />
+                    <Text style={styles.vibe}>{weather.tag}</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -129,4 +157,6 @@ const styles = StyleSheet.create({
   cityMeta: { color: '#9aa0a6', marginTop: 4 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   vibe: { color: '#e5e7eb', fontSize: 12 },
+  weatherRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 8 },
+  weatherText: { color: '#e5e7eb' },
 });

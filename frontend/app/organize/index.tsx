@@ -4,11 +4,13 @@ import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { fetchCountries, type CountrySummary } from '../../src/api/client';
 import MapPlaceholder from '../../src/components/MapPlaceholder';
+import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../src/assets/imagesBase64';
+import { seedIfNeeded } from '../../src/demo/seed';
 
-const countryThumbBase64: Record<string, string> = {
-  Japan: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQoU2NkYGD4z0AEMGGgQYAAAE1EAz6l1k2mAAAAAElFTkSuQmCC', // tiny beige
-  France: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQoU2P8z8AARMAgYGBgGGIYAgwAAE4iA2y5WJfEAAAAAElFTkSuQmCC', // tiny grey
-  India: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQoU2P8/5+BFGBgYGBgQDEMAQAAxQwD4M7kX6sAAAAASUVORK5CYII=', // tiny light
+const countryThumb: Record<string, string> = {
+  Japan: THUMB_JAPAN,
+  Bali: THUMB_BALI,
+  Goa: THUMB_GOA,
 };
 
 export default function OrganizeHome() {
@@ -21,6 +23,8 @@ export default function OrganizeHome() {
     const run = async () => {
       try {
         setLoading(true);
+        // Seed demo content if missing countries
+        await seedIfNeeded();
         const data = await fetchCountries();
         setCountries(data);
       } catch (e: any) {
@@ -62,7 +66,7 @@ export default function OrganizeHome() {
           {countries.map((c) => (
             <TouchableOpacity key={c.country} style={styles.card} onPress={() => router.push(`/organize/${encodeURIComponent(c.country)}`)}>
               <Image
-                source={{ uri: `data:image/png;base64,${countryThumbBase64[c.country] || countryThumbBase64.Japan}` }}
+                source={{ uri: `data:image/png;base64,${countryThumb[c.country] || THUMB_JAPAN}` }}
                 style={styles.thumb}
                 contentFit="cover"
               />

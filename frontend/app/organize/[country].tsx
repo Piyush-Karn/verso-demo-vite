@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchCities, type CitySummary } from '../../src/api/client';
@@ -8,7 +8,7 @@ import { Image } from 'expo-image';
 import { CITY_THUMBS } from '../../src/assets/imagesBase64';
 import { getCachedImage } from '../../src/services/imageCache';
 import { getIconBase64 } from '../../src/services/iconProvider';
-import { CitiesMap } from '../../src/services/map';
+import { CitiesMap, CitiesMapHandle } from '../../src/services/map';
 import { CITY_COORDS } from '../../src/services/geo';
 
 const themes = ['Foodie', 'Adventure', 'Culture', 'Nightlife'];
@@ -39,6 +39,7 @@ export default function WithinCountry() {
   const [cityImages, setCityImages] = useState<Record<string, string>>({});
   const [weatherIcon, setWeatherIcon] = useState<string | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
+  const mapRef = useRef<CitiesMapHandle>(null);
 
   useEffect(() => {
     if (!country) return;
@@ -47,12 +48,20 @@ export default function WithinCountry() {
         setLoading(true);
         const data = await fetchCities(String(country));
         setCities(data);
-        const results = await Promise.all(
-          data.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) }))
-        );
+        // Fetch only first 6 city images fast, then the rest lazily
+        const first = data.slice(0, 6);
+        const rest = data.slice(6);
+        const results = await Promise.all(first.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) })));
         const map: Record<string, string> = {};
         results.forEach((r) => { if (r.v) map[r.k] = r.v; });
         setCityImages(map);
+        // Lazy fetch remaining without blocking
+        setTimeout(async () => {
+          const later = await Promise.all(rest.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) })));
+          const extra: Record<string, string> = {};
+          later.forEach((r) => { if (r.v) extra[r.k] = r.v; });
+          setCityImages((prev) => ({ ...prev, ...extra }));
+        }, 0);
       } catch (e: any) {
         setError(e?.message || 'Failed to load');
       } finally {
@@ -79,6 +88,11 @@ export default function WithinCountry() {
     return coord ? { name: c.city, lng: coord[0], lat: coord[1] } : null;
   }).filter(Boolean) as Array<{ name: string; lng: number; lat: number }>;
 
+  const onCityCardPress = (name: string) => {
+    setPicked(name);
+    mapRef.current?.flyToCity(name);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -87,10 +101,9 @@ export default function WithinCountry() {
         <TouchableOpacity onPress={() => router.push('/organize/interests')}><Text style={styles.plan}>Your Interests</Text></TouchableOpacity>
       </View>
 
-      {/* Map of cities (web shows mapbox, native shows placeholder block) */}
       {cityPoints.length > 0 && (
         <View style={{ alignItems: 'center' }}>
-          <CitiesMap points={cityPoints} onSelect={setPicked} />
+          <CitiesMap ref={mapRef} points={cityPoints} onSelect={setPicked} />
         </View>
       )}
       {picked ? (
@@ -148,11 +161,11 @@ export default function WithinCountry() {
             <Text style={styles.legendText}>Rainy</Text>
           </View>
 
-          <View style={styles.grid}>
+          <View className="grid" style={styles.grid}>
             {cities.map((c) => {
               const base64 = cityImages[c.city] || CITY_THUMBS[c.city];
               return (
-                <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(c.city)}`)}>
+                <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => onCityCardPress(c.city)}>
                   {base64 ? (
                     <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.cityThumb} contentFit="cover" />
                   ) : null}

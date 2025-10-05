@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { fetchCountries, type CountrySummary } from '../../src/api/client';
-import DemoMap from '../../src/services/map';
+import DemoMap, { MapHandle } from '../../src/services/map';
 import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../src/assets/imagesBase64';
 import { seedIfNeeded } from '../../src/demo/seed';
 import { getCachedImage } from '../../src/services/imageCache';
@@ -19,6 +19,7 @@ export default function OrganizeHome() {
   const [picked, setPicked] = useState<string | null>(null);
   const tries = useRef(0);
   const polling = useRef<NodeJS.Timeout | null>(null);
+  const mapRef = useRef<MapHandle>(null);
 
   useEffect(() => {
     seedIfNeeded();
@@ -28,7 +29,6 @@ export default function OrganizeHome() {
         const data = await fetchCountries();
         setCountries(data);
         if (data.length === 0 && tries.current < 10) {
-          // First-time seeding can take time; poll until countries appear
           tries.current += 1;
           polling.current = setTimeout(run, 2000);
         } else {
@@ -54,6 +54,11 @@ export default function OrganizeHome() {
   const onPick = (c: string) => { setPicked(c); };
   const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}`); };
 
+  const onCardPress = (c: string) => {
+    setPicked(c);
+    mapRef.current?.flyToCountry(c);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
@@ -65,7 +70,7 @@ export default function OrganizeHome() {
       </View>
 
       <View style={{ alignItems: 'center', paddingVertical: 8 }}>
-        <DemoMap countries={countryNames} onSelectCountry={onPick} />
+        <DemoMap ref={mapRef} countries={countryNames} onSelectCountry={onPick} />
       </View>
 
       {picked ? (
@@ -88,7 +93,7 @@ export default function OrganizeHome() {
           {countries.map((c) => {
             const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
             return (
-              <TouchableOpacity key={c.country} style={styles.card} onPress={() => router.push(`/organize/${encodeURIComponent(c.country)}`)}>
+              <TouchableOpacity key={c.country} style={styles.card} onPress={() => onCardPress(c.country)}>
                 <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>{c.country}</Text>

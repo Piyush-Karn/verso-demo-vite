@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Share } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../src/api/client';
 import Badge from '../../src/components/Badge';
@@ -28,14 +28,16 @@ function getWeather(country: string | string[] | undefined, month: string | null
   return { kind: 'sunny' as const, tag: 'Ideal time to visit' };
 }
 
-function seasonOf(month: string, country: string) {
-  const rainy = getWeather(country, month)?.kind === 'rainy';
-  const shoulder = getWeather(country, month)?.kind === 'cloud';
-  return rainy ? 'rainy' : shoulder ? 'shoulder' : 'ideal';
+function monthDesc(country: string, month: string) {
+  const w = getWeather(country, month);
+  if (!w) return 'Weather data not available';
+  if (w.kind === 'rainy') return `${country} in ${month}: Expect frequent showers, humid days. Pack a light rain jacket.`;
+  if (w.kind === 'cloud') return `${country} in ${month}: Comfortable temperatures, moderate crowds — great for exploration.`;
+  return `${country} in ${month}: Clear skies, warm days, and the best overall experience.`;
 }
 
 export default function WithinCountry() {
-  const { country } = useLocalSearchParams<{ country: string }>();
+  const { country, focus } = useLocalSearchParams<{ country: string; focus?: string }>();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +49,8 @@ export default function WithinCountry() {
   const [weatherIcon, setWeatherIcon] = useState<string | null>(null);
   const mapRef = useRef<CitiesMapHandle>(null);
   const [inspirations, setInspirations] = useState<Inspiration[]>([]);
+  const [monthSheet, setMonthSheet] = useState<{ open: boolean; month: string | null }>({ open: false, month: null });
+  const [shareSheet, setShareSheet] = useState(false);
 
   useEffect(() => {
     if (!country) return;
@@ -55,21 +59,18 @@ export default function WithinCountry() {
         setLoading(true);
         const data = await fetchCities(String(country));
         setCities(data);
-        // fetch first 6 images quickly
         const first = data.slice(0, 6);
         const rest = data.slice(6);
         const results = await Promise.all(first.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) })));
         const map: Record<string, string> = {};
         results.forEach((r) => { if (r.v) map[r.k] = r.v; });
         setCityImages(map);
-        // lazy fetch remaining
         setTimeout(async () => {
           const later = await Promise.all(rest.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) })));
           const extra: Record<string, string> = {};
           later.forEach((r) => { if (r.v) extra[r.k] = r.v; });
           setCityImages((prev) => ({ ...prev, ...extra }));
         }, 0);
-        // fetch inspirations list for contributors/count
         const all = await Promise.all(data.map((c) => fetchCityItems(String(country), c.city)));
         setInspirations(all.flat());
       } catch (e: any) {
@@ -80,6 +81,17 @@ export default function WithinCountry() {
     };
     run();
   }, [country]);
+
+  useEffect(() => {
+    if (focus && mapRef.current && typeof country === 'string') {
+      // center to country (approx by averaging city coords or first city)
+      const first = cities[0]?.city;
+      if (first && CITY_COORDS[first]) {
+        const [lng, lat] = CITY_COORDS[first];
+        mapRef.current.flyToLngLat(lng, lat, 5);
+      }
+    }
+  }, [focus, cities, country]);
 
   const weather = useMemo(() => getWeather(country, activeMonth), [country, activeMonth]);
 
@@ -106,21 +118,18 @@ export default function WithinCountry() {
 
   const totalCount = inspirations.length;
 
-  const onShare = async () => {
-    try {
-      await Share.share({ message: `Verso playlist · ${country}\n${totalCount} inspirations curated by ${contributorNames.slice(0,3).join(', ')}\nOpen Verso to explore.` });
-    } catch {}
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => router.back()}><Text style={styles.back}>Back</Text></TouchableOpacity>
         <Text style={styles.title}>{country}</Text>
-        <TouchableOpacity onPress={() => router.push('/organize/interests')}><Text style={styles.plan}>Your Interests</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => setShareSheet(true)} style={styles.shareBtn}>
+          <Ionicons name="share-social-outline" size={16} color="#0b0b0b" />
+          <Text style={styles.shareText}>Share</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Contributors / count / share */}
+      {/* Contributors / count */}
       <View style={styles.statsRow}>
         <Text style={styles.statsText}>{totalCount} inspirations</Text>
         <View style={styles.avatars}>
@@ -132,16 +141,11 @@ export default function WithinCountry() {
             <View style={styles.avatar}><Text style={styles.avatarText}>+{contributorNames.length - 3}</Text></View>
           )}
         </View>
-        <TouchableOpacity onPress={onShare} style={styles.shareBtn}>
-          <Ionicons name="share-social-outline" size={16} color="#0b0b0b" />
-          <Text style={styles.shareText}>Share</Text>
-        </TouchableOpacity>
       </View>
 
-      {/* City map (web: mapbox; native: placeholder) */}
       {cityPoints.length > 0 && (
         <View style={{ alignItems: 'center' }}>
-          <CitiesMap ref={mapRef} points={cityPoints} onSelect={() => { /* no dynamic CTA here per requirement */ }} />
+          <CitiesMap ref={mapRef} points={cityPoints} onSelect={() => { /* no dynamic CTA here */ }} />
         </View>
       )}
 
@@ -176,14 +180,15 @@ export default function WithinCountry() {
             </ScrollView>
           )}
 
-          {/* Best time calendar panel */}
+          {/* Best time calendar panel with month click bottom sheet */}
           <View style={styles.calendar}>
             {months.map((m) => {
-              const tag = seasonOf(m, String(country));
+              const w = getWeather(country as string, m);
+              const tag = w?.kind === 'rainy' ? 'rainy' : w?.kind === 'cloud' ? 'shoulder' : 'ideal';
               return (
-                <View key={m} style={[styles.monthBox, tag === 'ideal' ? styles.monthIdeal : tag === 'shoulder' ? styles.monthShoulder : styles.monthRainy]}>
+                <TouchableOpacity key={m} style={[styles.monthBox, tag === 'ideal' ? styles.monthIdeal : tag === 'shoulder' ? styles.monthShoulder : styles.monthRainy]} onPress={() => setMonthSheet({ open: true, month: m })}>
                   <Text style={styles.monthText}>{m}</Text>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -217,6 +222,41 @@ export default function WithinCountry() {
           </View>
         </ScrollView>
       )}
+
+      {/* Month bottom sheet */}
+      <Modal visible={monthSheet.open} animationType="slide" transparent onRequestClose={() => setMonthSheet({ open: false, month: null })}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.sheet}>
+            <View style={styles.drag} />
+            <Text style={styles.sheetTitle}>Weather in {country} in {monthSheet.month}</Text>
+            <Text style={styles.sheetBody}>{monthDesc(String(country), monthSheet.month || '')}</Text>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setMonthSheet({ open: false, month: null })}><Text style={styles.closeText}>Close</Text></TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Share options bottom sheet */}
+      <Modal visible={shareSheet} animationType="slide" transparent onRequestClose={() => setShareSheet(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.sheet}>
+            <View style={styles.drag} />
+            <Text style={styles.sheetTitle}>Share this collection</Text>
+            <View style={styles.shareRow}>
+              <Ionicons name="logo-whatsapp" size={22} color="#e6e1d9" /><Text style={styles.sheetBody}>WhatsApp</Text>
+            </View>
+            <View style={styles.shareRow}>
+              <Ionicons name="logo-instagram" size={22} color="#e6e1d9" /><Text style={styles.sheetBody}>Instagram</Text>
+            </View>
+            <View style={styles.shareRow}>
+              <Ionicons name="mail-outline" size={22} color="#e6e1d9" /><Text style={styles.sheetBody}>Email</Text>
+            </View>
+            <View style={styles.shareRow}>
+              <Ionicons name="link-outline" size={22} color="#e6e1d9" /><Text style={styles.sheetBody}>Copy link</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShareSheet(false)}><Text style={styles.closeText}>Close</Text></TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -226,7 +266,8 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   back: { color: '#e6e1d9' },
   title: { color: '#fff', fontSize: 18, fontWeight: '600' },
-  plan: { color: '#e6e1d9', fontWeight: '600' },
+  shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e6e1d9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
+  shareText: { color: '#0b0b0b', fontWeight: '700' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   error: { color: '#ef4444' },
   filterRow: { flexDirection: 'row', gap: 16, marginBottom: 12, paddingHorizontal: 8 },
@@ -248,12 +289,18 @@ const styles = StyleSheet.create({
   avatars: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   avatar: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#e6e1d9', alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#0b0b0b', fontSize: 10, fontWeight: '700' },
-  shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e6e1d9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
-  shareText: { color: '#0b0b0b', fontWeight: '700' },
-  calendar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  calendar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8, paddingHorizontal: 8 },
   monthBox: { width: '22%', aspectRatio: 1.6, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   monthIdeal: { backgroundColor: '#114b8a' },
   monthShoulder: { backgroundColor: '#3b3b3b' },
   monthRainy: { backgroundColor: '#1f2f4a' },
   monthText: { color: '#e5e7eb', fontWeight: '600' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: '#111', padding: 20, borderTopLeftRadius: 18, borderTopRightRadius: 18 },
+  drag: { alignSelf: 'center', width: 44, height: 4, backgroundColor: '#333', borderRadius: 2, marginBottom: 10 },
+  sheetTitle: { color: '#fff', fontSize: 16, fontWeight: '600', marginBottom: 6 },
+  sheetBody: { color: '#e5e7eb' },
+  closeBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, alignItems: 'center', paddingVertical: 10, marginTop: 12 },
+  closeText: { color: '#e5e7eb' },
+  shareRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 8 },
 });

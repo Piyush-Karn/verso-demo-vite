@@ -35,7 +35,6 @@ const DemoMap = React.forwardRef<MapHandle, { countries: string[]; onSelectCount
       if (!mapRef.current || mapInstance.current) return;
       try {
         mapboxgl.accessToken = MAPBOX_TOKEN;
-        // Apple-like: use streets with blue water
         const style = 'mapbox://styles/mapbox/streets-v12';
         const map = new mapboxgl.Map({ container: mapRef.current, style, center: [80, 20], zoom: 1.4 });
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
@@ -63,7 +62,7 @@ const DemoMap = React.forwardRef<MapHandle, { countries: string[]; onSelectCount
 
 export default DemoMap;
 
-export type CitiesMapHandle = { flyToCity: (name: string) => void };
+export type CitiesMapHandle = { flyToCity: (name: string) => void; flyToLngLat: (lng: number, lat: number, zoom?: number) => void };
 
 export const CitiesMap = React.forwardRef<CitiesMapHandle, { points: Array<{ name: string; lng: number; lat: number }>; onSelect: (name: string) => void }>(
   ({ points, onSelect }, ref) => {
@@ -77,6 +76,9 @@ export const CitiesMap = React.forwardRef<CitiesMapHandle, { points: Array<{ nam
           if (p) inst.current.flyTo({ center: [p.lng, p.lat], zoom: 6 });
         }
       },
+      flyToLngLat: (lng: number, lat: number, zoom: number = 3.5) => {
+        if (Platform.OS === 'web' && inst.current) inst.current.flyTo({ center: [lng, lat], zoom });
+      }
     }));
 
     useEffect(() => {

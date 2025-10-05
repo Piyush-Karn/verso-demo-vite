@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { fetchCountries, type CountrySummary } from '../../src/api/client';
@@ -11,6 +11,13 @@ import Skeleton from '../../src/components/Skeleton';
 import { useToast } from '../../src/store/useToast';
 
 const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
+
+const queryForCountry = (c: string) => {
+  if (c === 'Bali') return 'Bali turquoise beach aerial';
+  if (c === 'Japan') return 'Japan mountain lake sunrise';
+  if (c === 'Goa') return 'Goa beach sunset palm trees';
+  return `${c} travel landscape`;
+};
 
 export default function OrganizeHome() {
   const router = useRouter();
@@ -36,7 +43,7 @@ export default function OrganizeHome() {
           polling.current = setTimeout(run, 2000);
         } else {
           const results = await Promise.all(
-            data.map(async (c) => ({ key: c.country, val: await getCachedImage(`${c.country} travel landscape`) }))
+            data.map(async (c) => ({ key: c.country, val: await getCachedImage(queryForCountry(c.country)) }))
           );
           const next: Record<string, string> = {};
           results.forEach((r) => { if (r.val) next[r.key] = r.val; });
@@ -55,20 +62,25 @@ export default function OrganizeHome() {
   const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
 
   const onPick = (c: string) => { setPicked(c); show(`Focused on ${c}`); mapRef.current?.flyToCountry(c); };
-  const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}`); };
+  const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}?focus=1`); };
 
   const onCardPress = (c: string) => onPick(c);
-
-  const filtered = picked ? countries.filter((x) => x.country === picked) : countries;
 
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <Text style={styles.greeting}>Hello, Explorer</Text>
         <Text style={styles.subtle}>{countries.reduce((a, c) => a + c.count, 0)} Collections saved across {countries.length} Countries</Text>
-        <TouchableOpacity onPress={() => router.push('/organize/interests')} style={styles.interestsBtn}>
-          <Text style={styles.interestsText}>Your Interests</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+          <TouchableOpacity onPress={() => router.push('/organize/interests')} style={styles.interestsBtn}>
+            <Text style={styles.interestsText}>Your Interests</Text>
+          </TouchableOpacity>
+          {picked && (
+            <TouchableOpacity onPress={() => setPicked(null)} style={styles.backAllBtn}>
+              <Text style={styles.backAllText}>Back to all</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <View style={{ alignItems: 'center', paddingVertical: 8 }}>
@@ -85,21 +97,24 @@ export default function OrganizeHome() {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Text style={styles.sectionTitle}>Your Collections</Text>
-          {filtered.map((c) => {
+          {countries.map((c) => {
             const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
+            const dim = picked && c.country !== picked;
             return (
-              <TouchableOpacity key={c.country} style={styles.card} onPress={() => onCardPress(c.country)}>
-                {base64 ? (
-                  <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
-                ) : (
-                  <Skeleton style={styles.thumb} />
-                )}
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{c.country}</Text>
-                  <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
-                </View>
-                <Text style={styles.arrow}>›</Text>
-              </TouchableOpacity>
+              <FadeRow key={c.country} dim={!!dim}>
+                <TouchableOpacity style={styles.card} onPress={() => onCardPress(c.country)} disabled={false}>
+                  {base64 ? (
+                    <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
+                  ) : (
+                    <Skeleton style={styles.thumb} />
+                  )}
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardTitle}>{c.country}</Text>
+                    <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
+                  </View>
+                  <Text style={styles.arrow}>›</Text>
+                </TouchableOpacity>
+              </FadeRow>
             );
           })}
         </ScrollView>
@@ -120,13 +135,23 @@ export default function OrganizeHome() {
   );
 }
 
+function FadeRow({ children, dim }: { children: React.ReactNode; dim: boolean }) {
+  const anim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    Animated.timing(anim, { toValue: dim ? 0.35 : 1, duration: 220, useNativeDriver: true }).start();
+  }, [dim, anim]);
+  return <Animated.View style={{ opacity: anim }}>{children}</Animated.View>;
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0b0b0b' },
   headerBar: { paddingTop: 24, paddingHorizontal: 16, paddingBottom: 8 },
   greeting: { color: '#fff', fontSize: 22, fontWeight: '600' },
   subtle: { color: '#9aa0a6', marginTop: 4 },
-  interestsBtn: { alignSelf: 'flex-start', marginTop: 8, borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  interestsBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   interestsText: { color: '#e5e7eb', fontSize: 12 },
+  backAllBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  backAllText: { color: '#e5e7eb', fontSize: 12 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
   priming: { color: '#9aa0a6', fontSize: 12, marginTop: 12, textAlign: 'center' },
   error: { color: '#ef4444' },

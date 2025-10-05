@@ -11,7 +11,7 @@ function enrich(it: Inspiration) {
   const rating = 4.2 + (it.id.charCodeAt(0) % 8) / 10; // 4.2 - 4.9
   const duration = it.type === 'cafe' ? '45–90 min' : '2–3 hrs';
   const tags = it.theme?.length ? it.theme.join(' • ') : it.type === 'cafe' ? 'Coffee • Brunch' : 'Scenic • Local';
-  const neighborhood = it.city; // demo heuristic
+  const neighborhood = it.city;
   const open = it.type === 'cafe' ? '8:00–22:00' : '6:00–18:00';
   return { rating: rating.toFixed(1), duration, tags, neighborhood, open };
 }
@@ -25,7 +25,7 @@ export default function CityDeepDive() {
   const [type, setType] = useState<'activity' | 'cafe'>('activity');
   const [items, setItems] = useState<Inspiration[]>([]);
   const [sheetItem, setSheetItem] = useState<Inspiration | null>(null);
-  const { add } = useInterests();
+  const { add, toggle, has } = useInterests();
 
   useEffect(() => {
     if (!country || !city) return;
@@ -67,7 +67,7 @@ export default function CityDeepDive() {
       ) : (
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={width} snapToAlignment="center">
           {items.map((it, idx) => (
-            <Card key={it.id} width={width} item={it} index={idx} onPress={() => setSheetItem(it)} onAdd={() => onAdd(it)} country={String(country)} city={String(city)} />
+            <Card key={it.id} width={width} item={it} index={idx} onPress={() => setSheetItem(it)} onAdd={() => onAdd(it)} onHeart={() => toggle({ id: it.id, title: it.title || it.url, type: it.type, country: it.country, city: it.city, image_base64: it.image_base64, cost_indicator: it.cost_indicator })} liked={has(it.id)} />
           ))}
         </ScrollView>
       )}
@@ -77,18 +77,17 @@ export default function CityDeepDive() {
   );
 }
 
-function Card({ item, index, onPress, onAdd, width, country, city }: { item: Inspiration; index: number; onPress: () => void; onAdd: () => void; width: number; country: string; city: string }) {
+function Card({ item, index, onPress, onAdd, onHeart, liked, width }: { item: Inspiration; index: number; onPress: () => void; onAdd: () => void; onHeart: () => void; liked: boolean; width: number }) {
   const anim = useRef(new Animated.Value(0)).current;
   const [photo, setPhoto] = useState<string | null>(null);
   useEffect(() => { Animated.timing(anim, { toValue: 1, duration: 420, delay: index * 60, useNativeDriver: true }).start(); }, [anim, index]);
   useEffect(() => {
     if (!item.image_base64) {
-      // Lazy image fetch per card for speed
-      getCachedImage(`${item.title || item.url} ${city} ${country}`)
+      getCachedImage(`${item.title || item.url} ${item.city} ${item.country}`)
         .then((img) => { if (img) setPhoto(img); })
         .catch(() => {});
     }
-  }, [item.image_base64, item.title, item.url, city, country]);
+  }, [item.image_base64, item.title, item.url, item.city, item.country]);
   const ex = enrich(item);
   const displayBase64 = item.image_base64 || photo || null;
 
@@ -115,8 +114,13 @@ function Card({ item, index, onPress, onAdd, width, country, city }: { item: Ins
           <Text style={styles.tagsText}>{ex.neighborhood} • Hours {ex.open}</Text>
         </View>
         <View style={styles.metaBar}>
-          <TouchableOpacity style={styles.addBtn} onPress={onAdd}><Text style={styles.addText}>+ Add to Interests</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.detailBtn} onPress={onPress}><Text style={styles.detailText}>Details</Text></TouchableOpacity>
+          <TouchableOpacity onPress={onHeart}>
+            <Ionicons name={liked ? 'heart' : 'heart-outline'} size={22} color={liked ? '#e25555' : '#e6e1d9'} />
+          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity style={styles.addBtn} onPress={onAdd}><Text style={styles.addText}>+ Add to Interests</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.detailBtn} onPress={onPress}><Text style={styles.detailText}>Details</Text></TouchableOpacity>
+          </View>
         </View>
       </View>
     </Animated.View>
@@ -192,7 +196,7 @@ const styles = StyleSheet.create({
   badgeText: { color: '#e5e7eb' },
   dot: { color: '#e5e7eb', marginHorizontal: 4 },
   tagsText: { color: '#e5e7eb', marginTop: 4 },
-  metaBar: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 8 },
+  metaBar: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 8, alignItems: 'center' },
   addBtn: { borderWidth: 1, borderColor: '#e6e1d9', borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14 },
   addText: { color: '#e6e1d9', fontWeight: '600' },
   detailBtn: { backgroundColor: '#e6e1d9', borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14 },

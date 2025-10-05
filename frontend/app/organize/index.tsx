@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
@@ -17,21 +17,28 @@ export default function OrganizeHome() {
   const [countries, setCountries] = useState<CountrySummary[]>([]);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<string | null>(null);
+  const tries = useRef(0);
+  const polling = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Fire-and-forget seeding to avoid blocking UI
     seedIfNeeded();
     const run = async () => {
       try {
         setLoading(true);
         const data = await fetchCountries();
         setCountries(data);
-        const results = await Promise.all(
-          data.map(async (c) => ({ key: c.country, val: await getCachedImage(`${c.country} travel landscape`) }))
-        );
-        const next: Record<string, string> = {};
-        results.forEach((r) => { if (r.val) next[r.key] = r.val; });
-        setThumbs(next);
+        if (data.length === 0 && tries.current < 10) {
+          // First-time seeding can take time; poll until countries appear
+          tries.current += 1;
+          polling.current = setTimeout(run, 2000);
+        } else {
+          const results = await Promise.all(
+            data.map(async (c) => ({ key: c.country, val: await getCachedImage(`${c.country} travel landscape`) }))
+          );
+          const next: Record<string, string> = {};
+          results.forEach((r) => { if (r.val) next[r.key] = r.val; });
+          setThumbs(next);
+        }
       } catch (e: any) {
         setError(e?.message || 'Failed to load');
       } finally {
@@ -39,17 +46,13 @@ export default function OrganizeHome() {
       }
     };
     run();
+    return () => { if (polling.current) clearTimeout(polling.current); };
   }, []);
 
   const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
 
-  const onPick = (c: string) => {
-    setPicked(c);
-  };
-
-  const onNavigate = () => {
-    if (picked) router.push(`/organize/${encodeURIComponent(picked)}`);
-  };
+  const onPick = (c: string) => { setPicked(c); };
+  const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}`); };
 
   return (
     <View style={styles.container}>
@@ -73,7 +76,10 @@ export default function OrganizeHome() {
       ) : null}
 
       {loading ? (
-        <View style={styles.center}><ActivityIndicator color="#888" /></View>
+        <View style={styles.center}>
+          <ActivityIndicator color="#888" />
+          <Text style={styles.priming}>If this is your first load, we are priming demo content. This can take ~20–40s.</Text>
+        </View>
       ) : error ? (
         <View style={styles.center}><Text style={styles.error}>{error}</Text></View>
       ) : (
@@ -109,11 +115,12 @@ const styles = StyleSheet.create({
   subtle: { color: '#9aa0a6', marginTop: 4 },
   interestsBtn: { alignSelf: 'flex-start', marginTop: 8, borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   interestsText: { color: '#e5e7eb', fontSize: 12 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
+  priming: { color: '#9aa0a6', fontSize: 12, marginTop: 12, textAlign: 'center' },
   error: { color: '#ef4444' },
   sectionTitle: { color: '#e5e7eb', fontSize: 16, marginBottom: 8 },
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#141414', borderRadius: 16, padding: 12, marginBottom: 12, gap: 12 },
-  thumb: { width: 56, height: 56, borderRadius: 12, backgroundColor: '#1f2937' },
+  thumb: { width: 72, height: 72, borderRadius: 12, backgroundColor: '#1f2937' },
   cardTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
   cardMeta: { color: '#9aa0a6', marginTop: 4 },
   arrow: { color: '#9aa0a6', fontSize: 24 },

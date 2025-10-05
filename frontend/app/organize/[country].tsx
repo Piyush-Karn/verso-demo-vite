@@ -8,6 +8,8 @@ import { Image } from 'expo-image';
 import { CITY_THUMBS } from '../../src/assets/imagesBase64';
 import { getCachedImage } from '../../src/services/imageCache';
 import { getIconBase64 } from '../../src/services/iconProvider';
+import { CitiesMap } from '../../src/services/map';
+import { CITY_COORDS } from '../../src/services/geo';
 
 const themes = ['Foodie', 'Adventure', 'Culture', 'Nightlife'];
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -36,6 +38,7 @@ export default function WithinCountry() {
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
   const [cityImages, setCityImages] = useState<Record<string, string>>({});
   const [weatherIcon, setWeatherIcon] = useState<string | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
 
   useEffect(() => {
     if (!country) return;
@@ -71,6 +74,11 @@ export default function WithinCountry() {
     return () => { mounted = false; };
   }, [weather]);
 
+  const cityPoints = cities.map((c) => {
+    const coord = CITY_COORDS[c.city];
+    return coord ? { name: c.city, lng: coord[0], lat: coord[1] } : null;
+  }).filter(Boolean) as Array<{ name: string; lng: number; lat: number }>;
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -78,6 +86,19 @@ export default function WithinCountry() {
         <Text style={styles.title}>{country}</Text>
         <TouchableOpacity onPress={() => router.push('/organize/interests')}><Text style={styles.plan}>Your Interests</Text></TouchableOpacity>
       </View>
+
+      {/* Map of cities (web shows mapbox, native shows placeholder block) */}
+      {cityPoints.length > 0 && (
+        <View style={{ alignItems: 'center' }}>
+          <CitiesMap points={cityPoints} onSelect={setPicked} />
+        </View>
+      )}
+      {picked ? (
+        <View style={styles.ctaBar}>
+          <Text style={styles.ctaText}>Take me to {picked}</Text>
+          <TouchableOpacity onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(picked)}`)} style={styles.ctaBtn}><Text style={styles.ctaBtnText}>Go</Text></TouchableOpacity>
+        </View>
+      ) : null}
 
       {loading ? (
         <View style={styles.center}><ActivityIndicator color="#888" /></View>
@@ -118,7 +139,6 @@ export default function WithinCountry() {
             ))}
           </ScrollView>
 
-          {/* Best time to visit legend */}
           <View style={styles.legendRow}>
             <Ionicons name="sunny-outline" size={14} color="#e6e1d9" />
             <Text style={styles.legendText}>Ideal time</Text>
@@ -127,17 +147,6 @@ export default function WithinCountry() {
             <Ionicons name="rainy-outline" size={14} color="#e6e1d9" style={{ marginLeft: 12 }} />
             <Text style={styles.legendText}>Rainy</Text>
           </View>
-
-          {activeMonth && weather && (
-            <View style={styles.weatherRow}>
-              {weatherIcon ? (
-                <Image source={{ uri: `data:image/png;base64,${weatherIcon}` }} style={{ width: 18, height: 18, marginRight: 6 }} />
-              ) : (
-                <Ionicons name={weather.kind === 'sunny' ? 'sunny-outline' : weather.kind === 'rainy' ? 'rainy-outline' : 'cloud-outline'} size={16} color="#e6e1d9" />
-              )}
-              <Text style={styles.weatherText}>{weather.tag}</Text>
-            </View>
-          )}
 
           <View style={styles.grid}>
             {cities.map((c) => {
@@ -187,4 +196,8 @@ const styles = StyleSheet.create({
   weatherText: { color: '#e5e7eb' },
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginVertical: 6 },
   legendText: { color: '#9aa0a6', marginLeft: 4 },
+  ctaBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 16, backgroundColor: '#141414', borderRadius: 12, padding: 12, marginTop: 8 },
+  ctaText: { color: '#e5e7eb' },
+  ctaBtn: { backgroundColor: '#e6e1d9', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  ctaBtnText: { color: '#0b0b0b', fontWeight: '700' },
 });

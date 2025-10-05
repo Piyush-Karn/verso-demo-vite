@@ -4,6 +4,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchCities, type CitySummary } from '../../src/api/client';
 import Badge from '../../src/components/Badge';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { CITY_THUMBS } from '../../src/assets/imagesBase64';
+import { getCachedImage } from '../../src/services/imageCache';
+import { getIconBase64 } from '../../src/services/iconProvider';
 
 const themes = ['Foodie', 'Adventure', 'Culture', 'Nightlife'];
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -11,21 +15,14 @@ const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 function getWeather(country: string | string[] | undefined, month: string | null) {
   if (!month) return null;
   const m = month;
-  // Demo mapping per country
-  const rainyMonths = {
-    Bali: ['Nov','Dec','Jan','Feb'],
-    Goa: ['Jun','Jul','Aug','Sep'],
-    Japan: ['Jun','Jul'],
-  } as Record<string, string[]>;
+  const rainyMonths = { Bali: ['Nov','Dec','Jan','Feb'], Goa: ['Jun','Jul','Aug','Sep'], Japan: ['Jun','Jul'] } as Record<string, string[]>;
   const shoulder = ['Mar','Apr','Oct','Nov'];
-
   const c = Array.isArray(country) ? country[0] : country || 'General';
   const isRain = rainyMonths[c]?.includes(m);
   const isShoulder = shoulder.includes(m);
-
-  if (isRain) return { icon: 'rainy-outline' as const, tag: 'Rainy season' };
-  if (isShoulder) return { icon: 'cloud-outline' as const, tag: 'Shoulder season' };
-  return { icon: 'sunny-outline' as const, tag: 'Ideal time to visit' };
+  if (isRain) return { kind: 'rainy' as const, tag: 'Rainy season' };
+  if (isShoulder) return { kind: 'cloud' as const, tag: 'Shoulder season' };
+  return { kind: 'sunny' as const, tag: 'Ideal time to visit' };
 }
 
 export default function WithinCountry() {
@@ -37,6 +34,8 @@ export default function WithinCountry() {
   const [activeTheme, setActiveTheme] = useState<string | null>(null);
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
+  const [cityImages, setCityImages] = useState<Record<string, string>>({});
+  const [weatherIcon, setWeatherIcon] = useState<string | null>(null);
 
   useEffect(() => {
     if (!country) return;
@@ -45,6 +44,12 @@ export default function WithinCountry() {
         setLoading(true);
         const data = await fetchCities(String(country));
         setCities(data);
+        const results = await Promise.all(
+          data.map(async (c) => ({ k: c.city, v: await getCachedImage(`${c.city} ${country} landmark sunset`) }))
+        );
+        const map: Record<string, string> = {};
+        results.forEach((r) => { if (r.v) map[r.k] = r.v; });
+        setCityImages(map);
       } catch (e: any) {
         setError(e?.message || 'Failed to load');
       } finally {
@@ -55,6 +60,16 @@ export default function WithinCountry() {
   }, [country]);
 
   const weather = useMemo(() => getWeather(country, activeMonth), [country, activeMonth]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!weather) { setWeatherIcon(null); return; }
+      const base = await getIconBase64(weather.kind);
+      if (mounted) setWeatherIcon(base || null);
+    })();
+    return () => { mounted = false; };
+  }, [weather]);
 
   return (
     <View style={styles.container}>
@@ -80,15 +95,11 @@ export default function WithinCountry() {
             </TouchableOpacity>
           </View>
 
-          {/* Badges */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {activeTheme && <Badge label={`Theme: ${activeTheme}`} />}
-            {activeMonth && weather && (
-              <Badge label={`${activeMonth} · ${weather.tag}`} />
-            )}
+            {activeMonth && weather && <Badge label={`${activeMonth} · ${weather.tag}`} />}
           </View>
 
-          {/* Theme quick picks (hidden until Theme clicked) */}
           {showThemePicker && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }} contentContainerStyle={{ gap: 8 }}>
               {themes.map((t) => (
@@ -99,7 +110,6 @@ export default function WithinCountry() {
             </ScrollView>
           )}
 
-          {/* Month quick picks (demo) */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
             {months.map((m) => (
               <TouchableOpacity key={m} onPress={() => setActiveMonth((prev) => (prev === m ? null : m))} style={[styles.chip, activeMonth === m && styles.chipActive]}>
@@ -108,27 +118,32 @@ export default function WithinCountry() {
             ))}
           </ScrollView>
 
-          {/* Weather guide row */}
           {activeMonth && weather && (
             <View style={styles.weatherRow}>
-              <Ionicons name={weather.icon} size={16} color="#e6e1d9" />
+              {weatherIcon ? (
+                <Image source={{ uri: `data:image/png;base64,${weatherIcon}` }} style={{ width: 18, height: 18, marginRight: 6 }} />
+              ) : (
+                <Ionicons name={weather.kind === 'sunny' ? 'sunny-outline' : weather.kind === 'rainy' ? 'rainy-outline' : 'cloud-outline'} size={16} color="#e6e1d9" />
+              )}
               <Text style={styles.weatherText}>{weather.tag}</Text>
             </View>
           )}
 
           <View style={styles.grid}>
-            {cities.map((c) => (
-              <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(c.city)}`)}>
-                <Text style={styles.cityName}>{c.city}</Text>
-                <Text style={styles.cityMeta}>{c.count} saved</Text>
-                {activeMonth && weather && (
-                  <View style={styles.badgeRow}>
-                    <Ionicons name={weather.icon} size={14} color="#e6e1d9" />
-                    <Text style={styles.vibe}>{weather.tag}</Text>
+            {cities.map((c) => {
+              const base64 = cityImages[c.city] || CITY_THUMBS[c.city];
+              return (
+                <TouchableOpacity key={c.city} style={styles.cityCard} onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/${encodeURIComponent(c.city)}`)}>
+                  {base64 ? (
+                    <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.cityThumb} contentFit="cover" />
+                  ) : null}
+                  <View style={{ padding: 10 }}>
+                    <Text style={styles.cityName}>{c.city}</Text>
+                    <Text style={styles.cityMeta}>{c.count} saved</Text>
                   </View>
-                )}
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
       )}
@@ -152,7 +167,8 @@ const styles = StyleSheet.create({
   chipText: { color: '#e5e7eb', fontSize: 12 },
   chipTextActive: { color: '#0b0b0b', fontWeight: '700' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 8 },
-  cityCard: { width: '48%', backgroundColor: '#141414', borderRadius: 12, padding: 16 },
+  cityCard: { width: '48%', backgroundColor: '#141414', borderRadius: 12, overflow: 'hidden' },
+  cityThumb: { width: '100%', height: 96 },
   cityName: { color: '#fff', fontSize: 16, fontWeight: '600' },
   cityMeta: { color: '#9aa0a6', marginTop: 4 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },

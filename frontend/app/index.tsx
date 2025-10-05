@@ -1,15 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { HERO_TRAVEL } from '../src/assets/imagesBase64';
+import { getCachedImage } from '../src/services/imageCache';
 
 export default function Landing() {
   const router = useRouter();
+  const [hero, setHero] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const img = await getCachedImage('mountain sunrise vista');
+      if (mounted && img) setHero(img);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const source = hero ? { uri: `data:image/jpeg;base64,${hero}` } : { uri: `data:image/png;base64,${HERO_TRAVEL}` };
 
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={{ uri: `data:image/png;base64,${HERO_TRAVEL}` }}
+        source={source}
         style={styles.bg}
         imageStyle={{ opacity: 0.92 }}
       >

@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/store/useAuth';
 import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../src/assets/imagesBase64';
+import { getCachedImage } from '../src/services/imageCache';
 
 export default function AuthScreen() {
   const router = useRouter();
   const { signInDummy } = useAuth();
   const [email, setEmail] = useState('');
+  const [jp, setJp] = useState<string | null>(null);
+  const [ba, setBa] = useState<string | null>(null);
+  const [go, setGo] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const [a, b, c] = await Promise.all([
+        getCachedImage('Japan travel city street'),
+        getCachedImage('Bali beach cliff'),
+        getCachedImage('Goa beach sunset'),
+      ]);
+      if (!mounted) return;
+      if (a) setJp(a);
+      if (b) setBa(b);
+      if (c) setGo(c);
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const onEmailContinue = () => {
     const value = email.trim() || 'demo@verso.app';
@@ -21,9 +41,9 @@ export default function AuthScreen() {
         <View style={styles.overlay} />
 
         <View style={styles.thumbRow}>
-          <Image source={{ uri: `data:image/png;base64,${THUMB_JAPAN}` }} style={styles.thumb} />
-          <Image source={{ uri: `data:image/png;base64,${THUMB_BALI}` }} style={styles.thumb} />
-          <Image source={{ uri: `data:image/png;base64,${THUMB_GOA}` }} style={styles.thumb} />
+          <Image source={{ uri: jp ? `data:image/jpeg;base64,${jp}` : `data:image/png;base64,${THUMB_JAPAN}` }} style={styles.thumb} />
+          <Image source={{ uri: ba ? `data:image/jpeg;base64,${ba}` : `data:image/png;base64,${THUMB_BALI}` }} style={styles.thumb} />
+          <Image source={{ uri: go ? `data:image/jpeg;base64,${go}` : `data:image/png;base64,${THUMB_GOA}` }} style={styles.thumb} />
         </View>
 
         <View style={styles.sheet}>

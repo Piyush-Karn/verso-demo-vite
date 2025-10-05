@@ -3,30 +3,34 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { fetchCountries, type CountrySummary } from '../../src/api/client';
-import MapPlaceholder from '../../src/components/MapPlaceholder';
+import DemoMap from '../../src/services/map';
 import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../src/assets/imagesBase64';
 import { seedIfNeeded } from '../../src/demo/seed';
+import { getCachedImage } from '../../src/services/imageCache';
 
-const countryThumb: Record<string, string> = {
-  Japan: THUMB_JAPAN,
-  Bali: THUMB_BALI,
-  Goa: THUMB_GOA,
-};
+const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
 
 export default function OrganizeHome() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [countries, setCountries] = useState<CountrySummary[]>([]);
+  const [thumbs, setThumbs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const run = async () => {
       try {
         setLoading(true);
-        // Seed demo content if missing countries
         await seedIfNeeded();
         const data = await fetchCountries();
         setCountries(data);
+        // fetch dynamic thumbs
+        const results = await Promise.all(
+          data.map(async (c) => ({ key: c.country, val: await getCachedImage(`${c.country} travel landscape`) }))
+        );
+        const next: Record<string, string> = {};
+        results.forEach((r) => { if (r.val) next[r.key] = r.val; });
+        setThumbs(next);
       } catch (e: any) {
         setError(e?.message || 'Failed to load');
       } finally {
@@ -40,9 +44,7 @@ export default function OrganizeHome() {
 
   const onSelectCountry = (c: string) => {
     const exists = countries.find((x) => x.country === c);
-    if (exists) {
-      router.push(`/organize/${encodeURIComponent(c)}`);
-    }
+    if (exists) router.push(`/organize/${encodeURIComponent(c)}`);
   };
 
   return (
@@ -53,7 +55,7 @@ export default function OrganizeHome() {
       </View>
 
       <View style={{ alignItems: 'center', paddingVertical: 8 }}>
-        <MapPlaceholder countries={countryNames} onSelectCountry={onSelectCountry} />
+        <DemoMap countries={countryNames} onSelectCountry={onSelectCountry} />
       </View>
 
       {loading ? (
@@ -63,20 +65,19 @@ export default function OrganizeHome() {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Text style={styles.sectionTitle}>Your Collections</Text>
-          {countries.map((c) => (
-            <TouchableOpacity key={c.country} style={styles.card} onPress={() => router.push(`/organize/${encodeURIComponent(c.country)}`)}>
-              <Image
-                source={{ uri: `data:image/png;base64,${countryThumb[c.country] || THUMB_JAPAN}` }}
-                style={styles.thumb}
-                contentFit="cover"
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{c.country}</Text>
-                <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
-              </View>
-              <Text style={styles.arrow}>›</Text>
-            </TouchableOpacity>
-          ))}
+          {countries.map((c) => {
+            const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
+            return (
+              <TouchableOpacity key={c.country} style={styles.card} onPress={() => router.push(`/organize/${encodeURIComponent(c.country)}`)}>
+                <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.cardTitle}>{c.country}</Text>
+                  <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
+                </View>
+                <Text style={styles.arrow}>›</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       )}
 

@@ -76,7 +76,7 @@ export default function WithinCountry() {
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => router.back()}><Text style={styles.back}>Back</Text></TouchableOpacity>
         <Text style={styles.title}>{country}</Text>
-        <TouchableOpacity onPress={() => {}}><Text style={styles.plan}>Plan Trip</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/organize/interests')}><Text style={styles.plan}>Your Interests</Text></TouchableOpacity>
       </View>
 
       {loading ? (
@@ -117,6 +117,16 @@ export default function WithinCountry() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+
+          {/* Best time to visit legend */}
+          <View style={styles.legendRow}>
+            <Ionicons name="sunny-outline" size={14} color="#e6e1d9" />
+            <Text style={styles.legendText}>Ideal time</Text>
+            <Ionicons name="cloud-outline" size={14} color="#e6e1d9" style={{ marginLeft: 12 }} />
+            <Text style={styles.legendText}>Shoulder</Text>
+            <Ionicons name="rainy-outline" size={14} color="#e6e1d9" style={{ marginLeft: 12 }} />
+            <Text style={styles.legendText}>Rainy</Text>
+          </View>
 
           {activeMonth && weather && (
             <View style={styles.weatherRow}>
@@ -175,4 +185,6 @@ const styles = StyleSheet.create({
   vibe: { color: '#e5e7eb', fontSize: 12 },
   weatherRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 8 },
   weatherText: { color: '#e5e7eb' },
+  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginVertical: 6 },
+  legendText: { color: '#9aa0a6', marginLeft: 4 },
 });

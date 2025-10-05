@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { fetchCountries, type CountrySummary } from '../../src/api/client';
+import MapPlaceholder from '../../src/components/MapPlaceholder';
+
+const countryThumbBase64: Record<string, string> = {
+  Japan: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQoU2NkYGD4z0AEMGGgQYAAAE1EAz6l1k2mAAAAAElFTkSuQmCC', // tiny beige
+  France: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQoU2P8z8AARMAgYGBgGGIYAgwAAE4iA2y5WJfEAAAAAElFTkSuQmCC', // tiny grey
+  India: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQoU2P8/5+BFGBgYGBgQDEMAQAAxQwD4M7kX6sAAAAASUVORK5CYII=', // tiny light
+};
 
 export default function OrganizeHome() {
   const router = useRouter();
@@ -24,11 +32,24 @@ export default function OrganizeHome() {
     run();
   }, []);
 
+  const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
+
+  const onSelectCountry = (c: string) => {
+    const exists = countries.find((x) => x.country === c);
+    if (exists) {
+      router.push(`/organize/${encodeURIComponent(c)}`);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <Text style={styles.greeting}>Hello, Explorer</Text>
         <Text style={styles.subtle}>{countries.reduce((a, c) => a + c.count, 0)} Collections saved across {countries.length} Countries</Text>
+      </View>
+
+      <View style={{ alignItems: 'center', paddingVertical: 8 }}>
+        <MapPlaceholder countries={countryNames} onSelectCountry={onSelectCountry} />
       </View>
 
       {loading ? (
@@ -40,6 +61,11 @@ export default function OrganizeHome() {
           <Text style={styles.sectionTitle}>Your Collections</Text>
           {countries.map((c) => (
             <TouchableOpacity key={c.country} style={styles.card} onPress={() => router.push(`/organize/${encodeURIComponent(c.country)}`)}>
+              <Image
+                source={{ uri: `data:image/png;base64,${countryThumbBase64[c.country] || countryThumbBase64.Japan}` }}
+                style={styles.thumb}
+                contentFit="cover"
+              />
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{c.country}</Text>
                 <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
@@ -65,7 +91,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   error: { color: '#ef4444' },
   sectionTitle: { color: '#e5e7eb', fontSize: 16, marginBottom: 8 },
-  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#141414', borderRadius: 16, padding: 16, marginBottom: 12 },
+  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#141414', borderRadius: 16, padding: 12, marginBottom: 12, gap: 12 },
+  thumb: { width: 56, height: 56, borderRadius: 12, backgroundColor: '#1f2937' },
   cardTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
   cardMeta: { color: '#9aa0a6', marginTop: 4 },
   arrow: { color: '#9aa0a6', fontSize: 24 },

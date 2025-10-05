@@ -99,5 +99,51 @@
 
 
 #====================================================================================================
+
+## user_problem_statement: Build Verso mobile-first travel organizer with Google sign-in, manual inspiration adding, organized collections by country/city, and an AI co-pilot using Emergent LLM key.
+
+## backend:
+##   - task: "Create Inspirations CRUD + Collections summaries"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Implemented /api/inspirations (POST, GET), /api/collections/summary, /api/collections/{country}/cities, /api/city/{country}/{city}/items endpoints with base64 image support."
+##
+## frontend:
+##   - task: "Implement Landing + Auth + Organize flows (expo-router)"
+##     implemented: false
+##     working: "NA"
+##     file: "/app/frontend/app/*"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Planned. Awaiting Google OAuth client IDs from user to wire real sign-in."
+##
+## metadata:
+##   created_by: "main_agent"
+##   version: "1.0"
+##   test_sequence: 1
+##   run_ui: false
+##
+## test_plan:
+##   current_focus:
+##     - "Create Inspirations CRUD + Collections summaries"
+##   stuck_tasks:
+##     - "None"
+##   test_all: false
+##   test_priority: "high_first"
+##
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please test the new backend endpoints for inspirations and summaries. Ensure /api/inspirations POST + GET, /api/collections/summary, /api/collections/{country}/cities, and /api/city/{country}/{city}/items work as expected."
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================

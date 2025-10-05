@@ -20,6 +20,7 @@ export default function RootLayout() {
         <Stack.Screen name="organize/[country]" />
         <Stack.Screen name="organize/[country]/[city]" />
         <Stack.Screen name="add" />
+        <Stack.Screen name="organize/interests" />
       </Stack>
     </GestureHandlerRootView>
   );

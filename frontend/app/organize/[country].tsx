@@ -121,8 +121,10 @@ export default function WithinCountry() {
 
   const monthCats: CategoryKey[] = useMemo(() => {
     const m = activeMonth || months[new Date().getMonth()];
-    return MONTH_TOPS[m] || CATEGORY_KEYS;
-  }, [activeMonth]);
+    const countryName = Array.isArray(country) ? country[0] : (country || 'Bali');
+    const countryRankings = COUNTRY_MONTH_RANKINGS[countryName] || COUNTRY_MONTH_RANKINGS['Bali'];
+    return countryRankings[m] || CATEGORY_KEYS;
+  }, [activeMonth, country]);
 
   const header = (
     <View style={styles.headerRow}>

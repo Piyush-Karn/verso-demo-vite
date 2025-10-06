@@ -469,11 +469,18 @@ export default function CategoryDeepDive() {
       {loading ? (
         <View style={styles.center}><ActivityIndicator color="#888" /></View>
       ) : (
-        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={width} snapToAlignment="center">
+        <ScrollView 
+          pagingEnabled 
+          showsVerticalScrollIndicator={false} 
+          decelerationRate="fast" 
+          snapToInterval={height}
+          snapToAlignment="start"
+        >
           {items.map((it, idx) => (
             <Card 
               key={it.id} 
               width={width} 
+              height={height}
               item={it} 
               index={idx} 
               onPress={() => setSheetItem(it)} 

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../../../src/api/client';
+import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../../src/api/client';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
-import Skeleton from '../../../../src/components/Skeleton';
-import { CITY_THUMBS } from '../../../../src/assets/imagesBase64';
-import { getCachedImage } from '../../../../src/services/imageCache';
-import { CATEGORY_KEYS, getCategoryThumb, type CategoryKey } from '../../../../src/services/categoryImages';
+import Skeleton from '../../../src/components/Skeleton';
+import { CITY_THUMBS } from '../../../src/assets/imagesBase64';
+import { getCachedImage } from '../../../src/services/imageCache';
+import { CATEGORY_KEYS, getCategoryThumb, type CategoryKey } from '../../../src/services/categoryImages';
 
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 

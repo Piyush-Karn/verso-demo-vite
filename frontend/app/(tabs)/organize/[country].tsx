@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../src/api/client';
+import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../../../src/api/client';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import Skeleton from '../../src/components/Skeleton';

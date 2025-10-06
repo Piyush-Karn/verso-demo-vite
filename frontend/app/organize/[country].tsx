@@ -21,19 +21,50 @@ function getSeason(country: string | string[] | undefined, month: string | null)
   return 'sunny';
 }
 
-const MONTH_TOPS: Record<string, CategoryKey[]> = {
-  Jan: ['Beaches','Top cafes','Cultural & religious','Diving','Surfing','Hiking'],
-  Feb: ['Beaches','Top cafes','Diving','Surfing','Cultural & religious','Hiking'],
-  Mar: ['Hiking','Cultural & religious','Top cafes','Beaches','Diving','Surfing'],
-  Apr: ['Hiking','Top cafes','Cultural & religious','Beaches','Surfing','Diving'],
-  May: ['Surfing','Beaches','Top cafes','Hiking','Cultural & religious','Diving'],
-  Jun: ['Top cafes','Cultural & religious','Beaches','Hiking','Diving','Surfing'],
-  Jul: ['Top cafes','Cultural & religious','Beaches','Hiking','Diving','Surfing'],
-  Aug: ['Beaches','Surfing','Hiking','Top cafes','Cultural & religious','Diving'],
-  Sep: ['Hiking','Beaches','Top cafes','Cultural & religious','Surfing','Diving'],
-  Oct: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
-  Nov: ['Beaches','Top cafes','Cultural & religious','Surfing','Hiking','Diving'],
-  Dec: ['Beaches','Top cafes','Cultural & religious','Diving','Surfing','Hiking'],
+// Country-specific and season-aware category rankings
+const COUNTRY_MONTH_RANKINGS: Record<string, Record<string, CategoryKey[]>> = {
+  'Bali': {
+    Jan: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Feb: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Mar: ['Beaches','Cultural & religious','Top cafes','Hiking','Surfing','Diving'],
+    Apr: ['Beaches','Hiking','Cultural & religious','Top cafes','Surfing','Diving'],
+    May: ['Surfing','Beaches','Hiking','Top cafes','Cultural & religious','Diving'],
+    Jun: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Jul: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Aug: ['Surfing','Beaches','Hiking','Top cafes','Cultural & religious','Diving'],
+    Sep: ['Hiking','Beaches','Cultural & religious','Top cafes','Surfing','Diving'],
+    Oct: ['Beaches','Cultural & religious','Hiking','Top cafes','Surfing','Diving'],
+    Nov: ['Top cafes','Cultural & religious','Beaches','Hiking','Surfing','Diving'],
+    Dec: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+  },
+  'Japan': {
+    Jan: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Feb: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Mar: ['Cultural & religious','Hiking','Top cafes','Beaches','Surfing','Diving'],
+    Apr: ['Cultural & religious','Hiking','Top cafes','Beaches','Surfing','Diving'],
+    May: ['Hiking','Cultural & religious','Top cafes','Beaches','Surfing','Diving'],
+    Jun: ['Hiking','Top cafes','Cultural & religious','Beaches','Surfing','Diving'],
+    Jul: ['Beaches','Hiking','Top cafes','Cultural & religious','Surfing','Diving'],
+    Aug: ['Beaches','Hiking','Top cafes','Cultural & religious','Surfing','Diving'],
+    Sep: ['Hiking','Cultural & religious','Top cafes','Beaches','Surfing','Diving'],
+    Oct: ['Hiking','Cultural & religious','Top cafes','Beaches','Surfing','Diving'],
+    Nov: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Dec: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+  },
+  'Goa': {
+    Jan: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Feb: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Mar: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Apr: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    May: ['Top cafes','Cultural & religious','Beaches','Hiking','Surfing','Diving'],
+    Jun: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Jul: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Aug: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Sep: ['Cultural & religious','Top cafes','Hiking','Beaches','Surfing','Diving'],
+    Oct: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Nov: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+    Dec: ['Beaches','Top cafes','Cultural & religious','Hiking','Surfing','Diving'],
+  }
 };
 
 export default function WithinCountry() {

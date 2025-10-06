@@ -149,7 +149,11 @@ export default function WithinCountry() {
       {CATEGORY_KEYS.map((cat) => {
         const base64 = categoryImgs[cat];
         return (
-          <View key={cat} style={styles.cityCard}>
+          <TouchableOpacity 
+            key={cat} 
+            style={styles.cityCard}
+            onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/category/${encodeURIComponent(cat)}`)}
+          >
             {base64 ? (
               <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.cityThumb} contentFit="cover" />
             ) : (
@@ -159,7 +163,7 @@ export default function WithinCountry() {
               <Text style={styles.cityName}>{cat}</Text>
               <Text style={styles.cityMeta}>Curated picks</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         );
       })}
     </View>

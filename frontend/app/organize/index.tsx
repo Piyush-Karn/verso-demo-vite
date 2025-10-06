@@ -97,20 +97,19 @@ export default function OrganizeHome() {
           {countries.map((c) => {
             const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
             const dim = picked && c.country !== picked;
-            if (picked && dim) return null; // hide others entirely when picked
             return (
-              <FadeRow key={c.country} dim={false}>
-                <TouchableOpacity style={styles.card} onPress={() => onCardPress(c.country)}>
+              <FadeRow key={c.country} dim={dim}>
+                <TouchableOpacity style={[styles.card, dim && styles.cardDimmed]} onPress={() => onCardPress(c.country)}>
                   {base64 ? (
                     <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
                   ) : (
                     <Skeleton style={styles.thumb} />
                   )}
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{c.country}</Text>
-                    <Text style={styles.cardMeta}>{c.count} Inspirations</Text>
+                    <Text style={[styles.cardTitle, dim && styles.cardTitleDimmed]}>{c.country}</Text>
+                    <Text style={[styles.cardMeta, dim && styles.cardMetaDimmed]}>{c.count} Inspirations</Text>
                   </View>
-                  <Text style={styles.arrow}>›</Text>
+                  <Text style={[styles.arrow, dim && styles.arrowDimmed]}>›</Text>
                 </TouchableOpacity>
               </FadeRow>
             );

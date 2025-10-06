@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { fetchCountries, type CountrySummary } from '../../src/api/client';
-import DemoMap, { MapHandle } from '../../src/services/map';
-import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../src/assets/imagesBase64';
-import { seedIfNeeded } from '../../src/demo/seed';
-import { getCachedImage } from '../../src/services/imageCache';
-import Skeleton from '../../src/components/Skeleton';
+import { fetchCountries, type CountrySummary } from '../../../src/api/client';
+import DemoMap, { MapHandle } from '../../../src/services/map';
+import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../../src/assets/imagesBase64';
+import { seedIfNeeded } from '../../../src/demo/seed';
+import { getCachedImage } from '../../../src/services/imageCache';
+import Skeleton from '../../../src/components/Skeleton';
 
 const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
 
@@ -60,7 +60,7 @@ export default function OrganizeHome() {
   const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
 
   const onPick = (c: string) => { setPicked(c); mapRef.current?.flyToCountry(c); };
-  const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}?focus=1`); };
+  const onNavigate = () => { if (picked) router.push(`/(tabs)/organize/${encodeURIComponent(picked)}?focus=1`); };
   const onCardPress = (c: string) => onPick(c);
 
   return (
@@ -69,11 +69,8 @@ export default function OrganizeHome() {
         <Text style={styles.greeting}>Hello, Explorer</Text>
         <Text style={styles.subtle}>{countries.reduce((a, c) => a + c.count, 0)} Collections saved across {countries.length} Countries</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-          <TouchableOpacity onPress={() => router.push('/organize/interests')} style={styles.interestsBtn}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/organize/interests')} style={styles.interestsBtn}>
             <Text style={styles.interestsText}>Your Interests</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/explore')} style={styles.exploreBtn}>
-            <Text style={styles.exploreText}>Explore</Text>
           </TouchableOpacity>
           {picked && (
             <TouchableOpacity onPress={() => setPicked(null)} style={styles.backAllBtn}>
@@ -150,8 +147,6 @@ const styles = StyleSheet.create({
   subtle: { color: '#9aa0a6', marginTop: 4 },
   interestsBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   interestsText: { color: '#e5e7eb', fontSize: 12 },
-  exploreBtn: { backgroundColor: '#e6e1d9', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  exploreText: { color: '#0b0b0b', fontSize: 12, fontWeight: '600' },
   backAllBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   backAllText: { color: '#e5e7eb', fontSize: 12 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },

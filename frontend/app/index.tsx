@@ -18,8 +18,8 @@ export default function Landing() {
             <Text style={styles.logo}>VERSO</Text>
             <Text style={styles.title}>Your Travel Inspirations, Organized</Text>
             <Text style={styles.subtitle}>
-              See a place on Instagram, WhatsApp, or TikTok you love? Send it to Verso. We'll beautifully
-              organize all your saved spots and help you build your perfect trip, together.
+              Collaborate with friends. Share reels, videos, or blogs from Instagram, WhatsApp, TikTok, YouTube —
+              and we’ll neatly organize everything into one shared trip plan.
             </Text>
           </View>
         </SafeAreaView>
@@ -41,12 +41,6 @@ const styles = StyleSheet.create({
   title: { color: '#fff', fontSize: 28, textAlign: 'center', fontWeight: '700', marginTop: 8 },
   subtitle: { color: '#e5e7eb', fontSize: 16, textAlign: 'center', lineHeight: 24, marginTop: 12 },
   ctaWrap: { padding: 24 },
-  cta: {
-    backgroundColor: '#e6e1d9',
-    height: 56,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  cta: { backgroundColor: '#e6e1d9', height: 56, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   ctaText: { color: '#0b0b0b', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
 });

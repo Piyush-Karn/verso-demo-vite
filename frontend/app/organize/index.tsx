@@ -8,7 +8,6 @@ import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../src/assets/imagesBase6
 import { seedIfNeeded } from '../../src/demo/seed';
 import { getCachedImage } from '../../src/services/imageCache';
 import Skeleton from '../../src/components/Skeleton';
-import { useToast } from '../../src/store/useToast';
 
 const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
 
@@ -21,7 +20,6 @@ const queryForCountry = (c: string) => {
 
 export default function OrganizeHome() {
   const router = useRouter();
-  const { show } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [countries, setCountries] = useState<CountrySummary[]>([]);
@@ -61,9 +59,8 @@ export default function OrganizeHome() {
 
   const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
 
-  const onPick = (c: string) => { setPicked(c); show(`Focused on ${c}`); mapRef.current?.flyToCountry(c); };
+  const onPick = (c: string) => { setPicked(c); mapRef.current?.flyToCountry(c); };
   const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}?focus=1`); };
-
   const onCardPress = (c: string) => onPick(c);
 
   return (
@@ -100,9 +97,10 @@ export default function OrganizeHome() {
           {countries.map((c) => {
             const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
             const dim = picked && c.country !== picked;
+            if (picked && dim) return null; // hide others entirely when picked
             return (
-              <FadeRow key={c.country} dim={!!dim}>
-                <TouchableOpacity style={styles.card} onPress={() => onCardPress(c.country)} disabled={false}>
+              <FadeRow key={c.country} dim={false}>
+                <TouchableOpacity style={styles.card} onPress={() => onCardPress(c.country)}>
                   {base64 ? (
                     <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
                   ) : (

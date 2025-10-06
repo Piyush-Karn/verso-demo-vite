@@ -107,7 +107,7 @@ export const CitiesMap = React.forwardRef<CitiesMapHandle, { points: Array<{ nam
 );
 
 const styles = StyleSheet.create({
-  webMap: { width: '92%', height: 220, borderRadius: 16, overflow: 'hidden' },
+  webMap: { width: '96%', height: 260, borderRadius: 18, overflow: 'hidden' },
   wrap: { width: '100%', alignItems: 'center' },
-  nativePlaceholder: { width: '92%', height: 220, borderRadius: 16, backgroundColor: '#111' },
+  nativePlaceholder: { width: '96%', height: 260, borderRadius: 18, backgroundColor: '#111' },
 });

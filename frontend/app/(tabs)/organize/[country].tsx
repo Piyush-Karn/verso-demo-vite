@@ -292,6 +292,17 @@ export default function WithinCountry() {
           </View>
         </View>
       </Modal>
+
+      {/* Plan Trip CTA */}
+      <View style={styles.planTripContainer}>
+        <TouchableOpacity 
+          style={styles.planTripBtn}
+          onPress={() => router.push(`/(tabs)/trip/questionnaire?country=${encodeURIComponent(String(country))}`)}
+        >
+          <Ionicons name="airplane" size={20} color="#0b0b0b" />
+          <Text style={styles.planTripText}>Plan Trip to {country}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

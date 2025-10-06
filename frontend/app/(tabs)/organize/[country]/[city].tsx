@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchCityItems, type Inspiration } from '../../../../src/api/client';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
-import { useInterests } from '../../../src/store/useInterests';
+import { useInterests } from '../../../../src/store/useInterests';
 import { getCachedImage } from '../../../src/services/imageCache';
 
 function enrich(it: Inspiration) {

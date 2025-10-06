@@ -409,7 +409,7 @@ export default function CafeSelection() {
                     <Text style={styles.addToItineraryText}>Save to Itinerary</Text>
                   </TouchableOpacity>
                 </View>
-              </div>
+              </View>
             </View>
           );
         })}

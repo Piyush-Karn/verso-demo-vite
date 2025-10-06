@@ -24,8 +24,8 @@ export default function Landing() {
           </View>
         </SafeAreaView>
         <View style={styles.ctaWrap}>
-          <TouchableOpacity style={styles.cta} onPress={() => router.push('/(tabs)/trip')}>
-            <Text style={styles.ctaText}>Plan Your Trip</Text>
+          <TouchableOpacity style={styles.cta} onPress={() => router.push('/(tabs)/organize')}>
+            <Text style={styles.ctaText}>Start Organizing</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>

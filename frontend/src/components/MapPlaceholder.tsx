@@ -4,7 +4,9 @@ import Svg, { Rect, Circle, Line } from 'react-native-svg';
 import { Text } from 'react-native';
 
 const pinCoords: Record<string, { x: number; y: number }> = {
-  Japan: { x: 230, y: 70 },
+  Japan: { x: 260, y: 60 },
+  Bali: { x: 240, y: 95 },
+  Goa: { x: 190, y: 85 },
   France: { x: 120, y: 65 },
   India: { x: 200, y: 90 },
   USA: { x: 60, y: 70 },

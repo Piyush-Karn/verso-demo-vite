@@ -475,14 +475,14 @@ export default function CategoryDeepDive() {
           pagingEnabled 
           showsVerticalScrollIndicator={false} 
           decelerationRate="fast" 
-          snapToInterval={height}
+          snapToInterval={screenHeight}
           snapToAlignment="start"
         >
           {items.map((it, idx) => (
             <Card 
               key={it.id} 
               width={width} 
-              height={height}
+              height={screenHeight}
               item={it} 
               index={idx} 
               onPress={() => setSheetItem(it)} 

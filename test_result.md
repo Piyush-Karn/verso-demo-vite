@@ -175,5 +175,7 @@
 ##     -message: "Please test the new backend endpoints for inspirations and summaries. Ensure /api/inspirations POST + GET, /api/collections/summary, /api/collections/{country}/cities, and /api/city/{country}/{city}/items work as expected."
 ##     -agent: "testing"
 ##     -message: "Backend testing completed successfully! All FastAPI endpoints are working perfectly. Created comprehensive test suite in /app/backend_test.py covering all CRUD operations, filtering, validation, and error handling. All 11 test cases passed including health check, status management, inspirations CRUD with filtering, collections summaries, and negative validation tests. The backend is production-ready."
+##     -agent: "main"
+##     -message: "User reported critical issues in Organize section: 1) City tab navigation bug when on Things to Do 2) Non-clickable/non-loading thumbnails in Things to Do and Season Guide 3) Need category-specific deep dive views 4) Need month dropdown for Season Guide. Fixing these issues before implementing Explore section."
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================

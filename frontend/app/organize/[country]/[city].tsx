@@ -65,7 +65,7 @@ export default function CityDeepDive() {
       ) : error ? (
         <View style={styles.center}><Text style={styles.error}>{error}</Text></View>
       ) : (
-        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={width} snapToAlignment="center">
+        <ScrollView pagingEnabled showsVerticalScrollIndicator={false} decelerationRate="fast" snapToInterval={height * 0.9} snapToAlignment="start">
           {items.map((it, idx) => (
             <Card key={it.id} width={width} item={it} index={idx} onPress={() => setSheetItem(it)} onAdd={() => onAdd(it)} onHeart={() => toggle({ id: it.id, title: it.title || it.url, type: it.type, country: it.country, city: it.city, image_base64: it.image_base64, cost_indicator: it.cost_indicator })} liked={has(it.id)} />
           ))}

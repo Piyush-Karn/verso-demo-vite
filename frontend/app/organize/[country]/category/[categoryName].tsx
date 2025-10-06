@@ -513,14 +513,15 @@ export default function CategoryDeepDive() {
   );
 }
 
-function Card({ item, index, onPress, onAdd, onHeart, liked, width }: { 
+function Card({ item, index, onPress, onAdd, onHeart, liked, width, height }: { 
   item: any; 
   index: number; 
   onPress: () => void; 
   onAdd: () => void; 
   onHeart: () => void; 
   liked: boolean; 
-  width: number 
+  width: number;
+  height: number;
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   

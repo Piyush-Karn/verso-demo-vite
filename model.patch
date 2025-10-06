@@ -1,57 +1,107 @@
+diff --git a/frontend/app/_layout.tsx b/frontend/app/_layout.tsx
+index 569770a..0f5e586 100644
+--- a/frontend/app/_layout.tsx
++++ b/frontend/app/_layout.tsx
+@@ -1,31 +1,17 @@
+-import React from 'react';
+ import { Stack } from 'expo-router';
+-import { useColorScheme, View } from 'react-native';
+ import { GestureHandlerRootView } from 'react-native-gesture-handler';
+-import ToastHost from '../src/components/ToastHost';
++import { StatusBar } from 'expo-status-bar';
+ 
+ export default function RootLayout() {
+-  const scheme = useColorScheme();
+   return (
+     <GestureHandlerRootView style={{ flex: 1 }}>
+-      <View style={{ flex: 1 }}>
+-        <Stack
+-          screenOptions={{
+-            headerShown: false,
+-            animation: 'slide_from_right',
+-            contentStyle: { backgroundColor: scheme === 'dark' ? '#000' : '#fff' },
+-          }}
+-        >
+-          <Stack.Screen name="index" />
+-          <Stack.Screen name="auth" />
+-          <Stack.Screen name="organize/index" />
+-          <Stack.Screen name="organize/[country]" />
+-          <Stack.Screen name="organize/[country]/[city]" />
+-          <Stack.Screen name="organize/interests" />
+-          <Stack.Screen name="add" />
+-        </Stack>
+-        <ToastHost />
+-      </View>
++      <StatusBar style="light" backgroundColor="#0b0b0b" />
++      <Stack>
++        <Stack.Screen name="index" options={{ headerShown: false }} />
++        <Stack.Screen name="auth" options={{ headerShown: false }} />
++        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
++        <Stack.Screen name="add" options={{ headerShown: false }} />
++      </Stack>
+     </GestureHandlerRootView>
+   );
+ }
+\ No newline at end of file
 diff --git a/model.patch b/model.patch
-index 2e32322..e69de29 100644
+index cb6b1b9..e69de29 100644
 --- a/model.patch
 +++ b/model.patch
-@@ -1,39 +0,0 @@
+@@ -1,57 +0,0 @@
 -diff --git a/model.patch b/model.patch
--index b4cf554..e69de29 100644
+-index 2e32322..e69de29 100644
 ---- a/model.patch
 -+++ b/model.patch
--@@ -1,34 +0,0 @@
---diff --git a/test_result.md b/test_result.md
---index e2a67ab..ea34b36 100644
------ a/test_result.md
---+++ b/test_result.md
---@@ -105,15 +105,18 @@
--- ## backend:
--- ##   - task: "Create Inspirations CRUD + Collections summaries"
--- ##     implemented: true
----##     working: "NA"
---+##     working: true
--- ##     file: "/app/backend/server.py"
--- ##     stuck_count: 0
--- ##     priority: "high"
----##     needs_retesting: true
---+##     needs_retesting: false
--- ##     status_history:
--- ##         -working: "NA"
--- ##         -agent: "main"
--- ##         -comment: "Implemented /api/inspirations (POST, GET), /api/collections/summary, /api/collections/{country}/cities, /api/city/{country}/{city}/items endpoints with base64 image support."
---+##         -working: true
---+##         -agent: "testing"
---+##         -comment: "Comprehensive backend testing completed successfully. All 11 test cases passed: Health check (GET /api/), Status CRUD (POST/GET /api/status), Inspirations CRUD with filtering (POST/GET /api/inspirations), Collections summary (GET /api/collections/summary), Country cities (GET /api/collections/{country}/cities), City items (GET /api/city/{country}/{city}/items), and negative validation tests. All endpoints working correctly with proper data validation, filtering, and error handling."
--- ##
--- ## frontend:
--- ##   - task: "Implement Landing + Auth + Organize flows (expo-router)"
---@@ -145,5 +148,7 @@
--- ## agent_communication:
--- ##     -agent: "main"
--- ##     -message: "Please test the new backend endpoints for inspirations and summaries. Ensure /api/inspirations POST + GET, /api/collections/summary, /api/collections/{country}/cities, and /api/city/{country}/{city}/items work as expected."
---+##     -agent: "testing"
---+##     -message: "Backend testing completed successfully! All FastAPI endpoints are working perfectly. Created comprehensive test suite in /app/backend_test.py covering all CRUD operations, filtering, validation, and error handling. All 11 test cases passed including health check, status management, inspirations CRUD with filtering, collections summaries, and negative validation tests. The backend is production-ready."
--- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
--- #====================================================================================================
---\ No newline at end of file
-diff --git a/test_result.md b/test_result.md
-index 7418783..b2ff1e7 100644
---- a/test_result.md
-+++ b/test_result.md
-@@ -177,5 +177,7 @@
- ##     -message: "Backend testing completed successfully! All FastAPI endpoints are working perfectly. Created comprehensive test suite in /app/backend_test.py covering all CRUD operations, filtering, validation, and error handling. All 11 test cases passed including health check, status management, inspirations CRUD with filtering, collections summaries, and negative validation tests. The backend is production-ready."
- ##     -agent: "main"
- ##     -message: "User reported critical issues in Organize section: 1) City tab navigation bug when on Things to Do 2) Non-clickable/non-loading thumbnails in Things to Do and Season Guide 3) Need category-specific deep dive views 4) Need month dropdown for Season Guide. Fixing these issues before implementing Explore section."
-+##     -agent: "testing"
-+##     -message: "Comprehensive backend testing completed for all Verso travel app endpoints as requested. All 11 core tests passed plus extensive additional validation: Health check (GET /api/), Inspirations CRUD with advanced filtering (POST/GET /api/inspirations), Collections summary (GET /api/collections/summary), Country cities for Bali/Japan/Goa (GET /api/collections/{country}/cities), City items with activity/cafe filtering (GET /api/city/{country}/{city}/items). Verified 227 total inspirations across 3 countries (Bali: 84, Japan: 75, Goa: 68), proper JSON responses, filtering capabilities, and data structure compatibility. All endpoints returning correct data for frontend consumption. Backend is fully functional and production-ready."
- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
- #====================================================================================================
-\ No newline at end of file
+-@@ -1,39 +0,0 @@
+--diff --git a/model.patch b/model.patch
+--index b4cf554..e69de29 100644
+----- a/model.patch
+--+++ b/model.patch
+--@@ -1,34 +0,0 @@
+---diff --git a/test_result.md b/test_result.md
+---index e2a67ab..ea34b36 100644
+------ a/test_result.md
+---+++ b/test_result.md
+---@@ -105,15 +105,18 @@
+--- ## backend:
+--- ##   - task: "Create Inspirations CRUD + Collections summaries"
+--- ##     implemented: true
+----##     working: "NA"
+---+##     working: true
+--- ##     file: "/app/backend/server.py"
+--- ##     stuck_count: 0
+--- ##     priority: "high"
+----##     needs_retesting: true
+---+##     needs_retesting: false
+--- ##     status_history:
+--- ##         -working: "NA"
+--- ##         -agent: "main"
+--- ##         -comment: "Implemented /api/inspirations (POST, GET), /api/collections/summary, /api/collections/{country}/cities, /api/city/{country}/{city}/items endpoints with base64 image support."
+---+##         -working: true
+---+##         -agent: "testing"
+---+##         -comment: "Comprehensive backend testing completed successfully. All 11 test cases passed: Health check (GET /api/), Status CRUD (POST/GET /api/status), Inspirations CRUD with filtering (POST/GET /api/inspirations), Collections summary (GET /api/collections/summary), Country cities (GET /api/collections/{country}/cities), City items (GET /api/city/{country}/{city}/items), and negative validation tests. All endpoints working correctly with proper data validation, filtering, and error handling."
+--- ##
+--- ## frontend:
+--- ##   - task: "Implement Landing + Auth + Organize flows (expo-router)"
+---@@ -145,5 +148,7 @@
+--- ## agent_communication:
+--- ##     -agent: "main"
+--- ##     -message: "Please test the new backend endpoints for inspirations and summaries. Ensure /api/inspirations POST + GET, /api/collections/summary, /api/collections/{country}/cities, and /api/city/{country}/{city}/items work as expected."
+---+##     -agent: "testing"
+---+##     -message: "Backend testing completed successfully! All FastAPI endpoints are working perfectly. Created comprehensive test suite in /app/backend_test.py covering all CRUD operations, filtering, validation, and error handling. All 11 test cases passed including health check, status management, inspirations CRUD with filtering, collections summaries, and negative validation tests. The backend is production-ready."
+--- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+--- #====================================================================================================
+---\ No newline at end of file
+-diff --git a/test_result.md b/test_result.md
+-index 7418783..b2ff1e7 100644
+---- a/test_result.md
+-+++ b/test_result.md
+-@@ -177,5 +177,7 @@
+- ##     -message: "Backend testing completed successfully! All FastAPI endpoints are working perfectly. Created comprehensive test suite in /app/backend_test.py covering all CRUD operations, filtering, validation, and error handling. All 11 test cases passed including health check, status management, inspirations CRUD with filtering, collections summaries, and negative validation tests. The backend is production-ready."
+- ##     -agent: "main"
+- ##     -message: "User reported critical issues in Organize section: 1) City tab navigation bug when on Things to Do 2) Non-clickable/non-loading thumbnails in Things to Do and Season Guide 3) Need category-specific deep dive views 4) Need month dropdown for Season Guide. Fixing these issues before implementing Explore section."
+-+##     -agent: "testing"
+-+##     -message: "Comprehensive backend testing completed for all Verso travel app endpoints as requested. All 11 core tests passed plus extensive additional validation: Health check (GET /api/), Inspirations CRUD with advanced filtering (POST/GET /api/inspirations), Collections summary (GET /api/collections/summary), Country cities for Bali/Japan/Goa (GET /api/collections/{country}/cities), City items with activity/cafe filtering (GET /api/city/{country}/{city}/items). Verified 227 total inspirations across 3 countries (Bali: 84, Japan: 75, Goa: 68), proper JSON responses, filtering capabilities, and data structure compatibility. All endpoints returning correct data for frontend consumption. Backend is fully functional and production-ready."
+- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+- #====================================================================================================
+-\ No newline at end of file

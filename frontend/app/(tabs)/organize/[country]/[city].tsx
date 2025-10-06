@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView, Animated, Modal, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchCityItems, type Inspiration } from '../../../../src/api/client';
+import { fetchCityItems, type Inspiration } from '../../../src/api/client';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
-import { useInterests } from '../../../../src/store/useInterests';
-import { getCachedImage } from '../../../../src/services/imageCache';
+import { useInterests } from '../../../src/store/useInterests';
+import { getCachedImage } from '../../../src/services/imageCache';
 
 function enrich(it: Inspiration) {
   const rating = 4.2 + (it.id.charCodeAt(0) % 8) / 10; // 4.2 - 4.9

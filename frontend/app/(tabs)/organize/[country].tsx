@@ -292,17 +292,6 @@ export default function WithinCountry() {
           </View>
         </View>
       </Modal>
-
-      {/* Plan Trip CTA */}
-      <View style={styles.planTripContainer}>
-        <TouchableOpacity 
-          style={styles.planTripBtn}
-          onPress={() => router.push(`/(tabs)/trip/questionnaire?country=${encodeURIComponent(String(country))}`)}
-        >
-          <Ionicons name="airplane" size={20} color="#0b0b0b" />
-          <Text style={styles.planTripText}>Plan Trip to {country}</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -350,25 +339,4 @@ const styles = StyleSheet.create({
   monthOptionTextActive: { color: '#e6e1d9' },
   closeBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, alignItems: 'center', paddingVertical: 10, marginTop: 12 },
   closeText: { color: '#e5e7eb' },
-  planTripContainer: { 
-    position: 'absolute', 
-    bottom: 16, 
-    left: 16, 
-    right: 16 
-  },
-  planTripBtn: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'center',
-    backgroundColor: '#e6e1d9', 
-    borderRadius: 999, 
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    gap: 8
-  },
-  planTripText: { 
-    color: '#0b0b0b', 
-    fontSize: 16, 
-    fontWeight: '600' 
-  },
 });

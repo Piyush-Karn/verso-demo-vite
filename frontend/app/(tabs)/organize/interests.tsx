@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useInterests } from '../../../src/store/useInterests';
+import { useInterests } from '../../src/store/useInterests';
 import { Image } from 'expo-image';
 
 export default function InterestsScreen() {

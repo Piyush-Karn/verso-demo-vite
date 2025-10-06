@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Dimensions
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { getCachedImage } from '../../../../src/services/imageCache';
-import { useInterests } from '../../../../src/store/useInterests';
+import { getCachedImage } from '../../../../../src/services/imageCache';
+import { useInterests } from '../../../../../src/store/useInterests';
 
 const { height: screenHeight } = Dimensions.get('window');
 

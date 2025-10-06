@@ -72,7 +72,7 @@ export default function CityDeepDive() {
         </ScrollView>
       )}
 
-      <BottomSheet visible={!!sheetItem} onClose={() => setSheetItem(null)} item={sheetItem} />
+      <DetailsSheet visible={!!sheetItem} onClose={() => setSheetItem(null)} item={sheetItem} country={String(country)} city={String(city)} />
     </View>
   );
 }
@@ -127,8 +127,28 @@ function Card({ item, index, onPress, onAdd, onHeart, liked, width }: { item: In
   );
 }
 
-function BottomSheet({ visible, onClose, item }: { visible: boolean; onClose: () => void; item: Inspiration | null }) {
+function DetailsSheet({ visible, onClose, item, country, city }: { visible: boolean; onClose: () => void; item: Inspiration | null; country: string; city: string }) {
   const [tab, setTab] = useState<'overview' | 'reviews'>('overview');
+  const [thumbs, setThumbs] = useState<string[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    if (!item) return;
+    (async () => {
+      const qs = [
+        `${item?.title || ''} ${city} ${country}`,
+        `close up ${item?.type} ${city}`,
+        `scenic ${item?.type} ${city}`,
+      ];
+      const imgs: string[] = [];
+      for (const q of qs) {
+        const b = await getCachedImage(q);
+        if (b) imgs.push(b);
+      }
+      if (mounted) setThumbs(imgs);
+    })();
+    return () => { mounted = false; };
+  }, [item, country, city]);
+
   if (!item) return null;
   const reviews = [
     { source: 'Google', text: 'Absolutely loved this — the views were worth the early start. Great for photos.' },
@@ -138,23 +158,28 @@ function BottomSheet({ visible, onClose, item }: { visible: boolean; onClose: ()
   ];
 
   const overview = (
-    <View>
+    <ScrollView>
       <Text style={sheetStyles.sectionTitle}>About this {item.type}</Text>
-      <Text style={sheetStyles.body}>A thoughtfully curated {item.type} that showcases the best of {item.city}. Expect scenic spots, local flavors, and moments you’ll want to save. Great in spring and autumn; weekends can be busy.</Text>
+      <Text style={sheetStyles.body}>This detailed {item.type} experience explores the essence of {city}. Expect scenic spots, local flavors, and thoughtfully paced moments. Great in spring and autumn; weekends can be busy. Wear comfortable shoes and keep some cash handy for local vendors.</Text>
       <Text style={sheetStyles.body}>Typical cost: {item.cost_indicator || '$$'} • Crowd: {item.vibe_notes || 'Varies by season'} • Duration: {item.type === 'cafe' ? '45–90 min' : '2–3 hrs'}</Text>
+      <View style={sheetStyles.thumbRow}>
+        {thumbs.map((b64, i) => (
+          <Image key={i} source={{ uri: `data:image/jpeg;base64,${b64}` }} style={sheetStyles.thumb} contentFit="cover" />
+        ))}
+      </View>
       <TouchableOpacity style={sheetStyles.bookBtn}><Text style={sheetStyles.bookText}>Book this {item.type}</Text></TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 
   const reviewsTab = (
-    <View>
+    <ScrollView>
       {reviews.map((r, idx) => (
         <View key={idx} style={sheetStyles.reviewRow}>
           <Text style={sheetStyles.reviewSource}>{r.source}</Text>
           <Text style={sheetStyles.reviewText}>{r.text}</Text>
         </View>
       ))}
-    </View>
+    </ScrollView>
   );
 
   return (
@@ -205,7 +230,7 @@ const styles = StyleSheet.create({
 
 const sheetStyles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: '#111', padding: 20, borderTopLeftRadius: 18, borderTopRightRadius: 18 },
+  sheet: { backgroundColor: '#111', padding: 20, borderTopLeftRadius: 18, borderTopRightRadius: 18, maxHeight: '80%' },
   drag: { alignSelf: 'center', width: 44, height: 4, backgroundColor: '#333', borderRadius: 2, marginBottom: 10 },
   title: { color: '#fff', fontSize: 18, fontWeight: '600', marginBottom: 8 },
   tabs: { flexDirection: 'row', gap: 16, marginBottom: 12 },
@@ -220,4 +245,6 @@ const sheetStyles = StyleSheet.create({
   bookText: { color: '#0b0b0b', fontWeight: '700' },
   closeBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, alignItems: 'center', paddingVertical: 10, marginTop: 12 },
   closeText: { color: '#e5e7eb' },
+  thumbRow: { flexDirection: 'row', gap: 6, marginTop: 8 },
+  thumb: { width: 72, height: 72, borderRadius: 8 },
 });

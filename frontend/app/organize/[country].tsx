@@ -224,7 +224,40 @@ export default function WithinCountry() {
       )}
 
       <Modal visible={monthSheet} animationType="slide" transparent onRequestClose={() => setMonthSheet(false)}>
-        <View style={styles.modalOverlay}><View style={styles.sheet}><View style={styles.drag} /><Text style={styles.sheetTitle}>Season guide</Text><Text style={styles.sheetBody}>Select a month above to filter the best seasonal picks for {country}.</Text><TouchableOpacity style={styles.closeBtn} onPress={() => setMonthSheet(false)}><Text style={styles.closeText}>Close</Text></TouchableOpacity></View></View>
+        <View style={styles.modalOverlay}>
+          <View style={styles.sheet}>
+            <View style={styles.drag} />
+            <Text style={styles.sheetTitle}>Select travel month</Text>
+            <Text style={styles.sheetBody}>Choose when you'd like to visit {country} to see the best seasonal activities.</Text>
+            <View style={styles.monthGrid}>
+              {months.map((m) => {
+                const s = getSeason(country as string, m);
+                const isActive = activeMonth === m;
+                return (
+                  <TouchableOpacity 
+                    key={m} 
+                    style={[
+                      styles.monthOption,
+                      isActive && styles.monthOptionActive,
+                      s === 'sunny' ? styles.sunny : s === 'shoulder' ? styles.shoulder : styles.rainy
+                    ]} 
+                    onPress={() => {
+                      setActiveMonth(m);
+                      setMonthSheet(false);
+                    }}
+                  >
+                    <Text style={[styles.monthOptionText, isActive && styles.monthOptionTextActive]}>
+                      {m} {s === 'sunny' ? '☀️' : s === 'shoulder' ? '☁️' : '☔'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setMonthSheet(false)}>
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </View>
   );

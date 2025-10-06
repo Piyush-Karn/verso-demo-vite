@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchCities, type CitySummary, fetchCityItems, type Inspiration } from '../../src/api/client';
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import Skeleton from '../../src/components/Skeleton';
 import { CITY_THUMBS } from '../../src/assets/imagesBase64';
 import { getCachedImage } from '../../src/services/imageCache';

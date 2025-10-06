@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Modal 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import DemoMap, { MapHandle } from '../../src/services/map';
-import { getCachedImage } from '../../src/services/imageCache';
-import Skeleton from '../../src/components/Skeleton';
+import DemoMap, { MapHandle } from '../../../src/services/map';
+import { getCachedImage } from '../../../src/services/imageCache';
+import Skeleton from '../../../src/components/Skeleton';
 
 const FILTERS = [
   { id: 'distance', label: 'Distance', icon: 'location-outline' },

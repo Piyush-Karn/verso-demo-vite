@@ -171,22 +171,23 @@ export default function WithinCountry() {
 
   const seasonGrid = (
     <View>
-      <View style={styles.calendarRow}>
-        {months.map((m) => {
-          const s = getSeason(country as string, m);
-          return (
-            <TouchableOpacity key={m} style={[styles.monthPill, s === 'sunny' ? styles.sunny : s === 'shoulder' ? styles.shoulder : styles.rainy]} onPress={() => setActiveMonth(m)}>
-              <Text style={styles.monthText}>{m} {s === 'sunny' ? '☀️' : s === 'shoulder' ? '☁️' : '☔'}</Text>
-            </TouchableOpacity>
-          );
-        })}
+      <View style={styles.questionRow}>
+        <Text style={styles.questionText}>Which month would you like to travel?</Text>
+        <TouchableOpacity style={styles.dropdownBtn} onPress={() => setMonthSheet(true)}>
+          <Text style={styles.dropdownText}>{activeMonth || months[new Date().getMonth()]}</Text>
+          <Ionicons name="chevron-down" size={16} color="#e5e7eb" />
+        </TouchableOpacity>
       </View>
       <Text style={styles.sectionTitle}>Best in {activeMonth || months[new Date().getMonth()]}</Text>
       <View style={styles.grid}>
         {monthCats.map((cat) => {
           const base64 = categoryImgs[cat];
           return (
-            <View key={cat} style={styles.cityCard}>
+            <TouchableOpacity 
+              key={cat} 
+              style={styles.cityCard}
+              onPress={() => router.push(`/organize/${encodeURIComponent(String(country))}/category/${encodeURIComponent(cat)}`)}
+            >
               {base64 ? (
                 <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.cityThumb} contentFit="cover" />
               ) : (
@@ -196,7 +197,7 @@ export default function WithinCountry() {
                 <Text style={styles.cityName}>{cat}</Text>
                 <Text style={styles.cityMeta}>Seasonal favorites</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </View>

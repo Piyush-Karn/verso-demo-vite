@@ -120,16 +120,41 @@
 ##
 ## frontend:
 ##   - task: "Implement Landing + Auth + Organize flows (expo-router)"
+##     implemented: true
+##     working: false
+##     file: "/app/frontend/app/*"
+##     stuck_count: 1
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Planned. Awaiting Google OAuth client IDs from user to wire real sign-in."
+##         -working: false
+##         -agent: "user"
+##         -comment: "User reported multiple issues: 1) City tab not clickable when on Things to Do tab 2) Thumbnails in Things to Do and Season Guide not loading and not clickable 3) Need month selection dropdown for Season Guide 4) Need category deep dive views for Things to Do categories (beaches, diving, surfing, cafes) with multiple items per category"
+##   - task: "Fix Things to Do category navigation and thumbnails"
 ##     implemented: false
 ##     working: "NA"
-##     file: "/app/frontend/app/*"
+##     file: "/app/frontend/app/organize/[country].tsx"
 ##     stuck_count: 0
 ##     priority: "high"
 ##     needs_retesting: false
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "main"
-##         -comment: "Planned. Awaiting Google OAuth client IDs from user to wire real sign-in."
+##         -comment: "Need to make Things to Do thumbnails clickable and create category-specific deep dive views"
+##   - task: "Improve Season Guide with month dropdown"
+##     implemented: false
+##     working: "NA"
+##     file: "/app/frontend/app/organize/[country].tsx"
+##     stuck_count: 0
+##     priority: "medium"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Need to add month selection dropdown and improve season guide interaction"
 ##
 ## metadata:
 ##   created_by: "main_agent"

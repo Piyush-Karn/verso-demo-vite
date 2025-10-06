@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { fetchCountries, type CountrySummary } from '../../../src/api/client';
-import DemoMap, { MapHandle } from '../../../src/services/map';
-import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../../src/assets/imagesBase64';
-import { seedIfNeeded } from '../../../src/demo/seed';
-import { getCachedImage } from '../../../src/services/imageCache';
-import Skeleton from '../../../src/components/Skeleton';
+import { fetchCountries, type CountrySummary } from '../../../../src/api/client';
+import DemoMap, { MapHandle } from '../../../../src/services/map';
+import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../../../src/assets/imagesBase64';
+import { seedIfNeeded } from '../../../../src/demo/seed';
+import { getCachedImage } from '../../../../src/services/imageCache';
+import Skeleton from '../../../../src/components/Skeleton';
 
 const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
 

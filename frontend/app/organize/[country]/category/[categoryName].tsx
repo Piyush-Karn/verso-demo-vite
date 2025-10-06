@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView, Animated, Modal, useWindowDimensions } from 'react-native';
+
+const { height: screenHeight } = Dimensions.get('window');
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchCityItems, type Inspiration } from '../../../../src/api/client';
 import { Image } from 'expo-image';

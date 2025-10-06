@@ -535,8 +535,8 @@ function Card({ item, index, onPress, onAdd, onHeart, liked, width, height }: {
   }, [anim, index]);
 
   return (
-    <Animated.View style={{ width, opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>
-      <View style={styles.card}> 
+    <Animated.View style={{ width, height, opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>
+      <View style={[styles.card, { height }]}> 
         {item.image_base64 ? (
           <Image source={{ uri: `data:image/jpeg;base64,${item.image_base64}` }} style={styles.photo} contentFit="cover" />
         ) : (

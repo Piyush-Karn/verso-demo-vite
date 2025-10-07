@@ -95,11 +95,32 @@ export default function TripHome() {
                     <Skeleton style={styles.collectionImage} />
                   )}
                   <View style={styles.collectionOverlay}>
-                    <Text style={styles.collectionName}>{c.country}</Text>
-                    <Text style={styles.collectionCount}>{c.count} inspirations</Text>
-                    <View style={styles.planButton}>
-                      <Ionicons name="airplane" size={16} color="#0b0b0b" />
-                      <Text style={styles.planButtonText}>Plan Trip</Text>
+                    <View style={styles.collectionHeader}>
+                      <View>
+                        <Text style={styles.collectionName}>{c.country}</Text>
+                        <Text style={styles.collectionCount}>{c.count} inspirations</Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={styles.contributorEmoji}
+                        onPress={() => {
+                          setSelectedCountry(c.country);
+                          setShowContributors(true);
+                        }}
+                      >
+                        <Text style={styles.contributorText}>👥</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.buttonRow}>
+                      <TouchableOpacity 
+                        style={styles.reviewButton}
+                        onPress={() => router.push('/(tabs)/explore')}
+                      >
+                        <Text style={styles.reviewButtonText}>Review Collection</Text>
+                      </TouchableOpacity>
+                      <View style={styles.planButton}>
+                        <Ionicons name="airplane" size={16} color="#0b0b0b" />
+                        <Text style={styles.planButtonText}>Plan Trip</Text>
+                      </View>
                     </View>
                   </View>
                 </TouchableOpacity>

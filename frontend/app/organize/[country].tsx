@@ -349,4 +349,7 @@ const styles = StyleSheet.create({
   monthOptionTextActive: { color: '#e6e1d9' },
   closeBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, alignItems: 'center', paddingVertical: 10, marginTop: 12 },
   closeText: { color: '#e5e7eb' },
+  ctaContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: '#0b0b0b' },
+  planTripBtn: { backgroundColor: '#e6e1d9', height: 56, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  planTripText: { color: '#0b0b0b', fontSize: 16, fontWeight: '700' },
 });

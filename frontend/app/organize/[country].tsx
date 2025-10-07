@@ -256,6 +256,16 @@ export default function WithinCountry() {
         </ScrollView>
       )}
 
+      {/* Plan Your Trip CTA */}
+      <View style={styles.ctaContainer}>
+        <TouchableOpacity 
+          style={styles.planTripBtn} 
+          onPress={() => router.push(`/trip/questionnaire?country=${encodeURIComponent(String(country))}`)}
+        >
+          <Text style={styles.planTripText}>Plan Your Trip to {country}</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal visible={monthSheet} animationType="slide" transparent onRequestClose={() => setMonthSheet(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.sheet}>

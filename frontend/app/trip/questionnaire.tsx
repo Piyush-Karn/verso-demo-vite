@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { getCachedImage } from '../../../src/services/imageCache';
+import { getCachedImage } from '../src/services/imageCache';
 
 type StepType = 'location' | 'dates' | 'travelers' | 'preferences' | 'review';
 

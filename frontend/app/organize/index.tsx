@@ -155,6 +155,8 @@ const styles = StyleSheet.create({
   interestsText: { color: '#e5e7eb', fontSize: 12 },
   exploreBtn: { backgroundColor: '#e6e1d9', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   exploreText: { color: '#0b0b0b', fontSize: 12, fontWeight: '600' },
+  tripBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  tripText: { color: '#e5e7eb', fontSize: 12 },
   backAllBtn: { borderWidth: 1, borderColor: '#2a2e35', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   backAllText: { color: '#e5e7eb', fontSize: 12 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },

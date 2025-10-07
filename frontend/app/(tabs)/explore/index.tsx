@@ -1,14 +1,13 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Modal, ActivityIndicator, Animated } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import DemoMap, { MapHandle } from '../../../src/services/map';
-import { getCachedImage } from '../../../src/services/imageCache';
-import Skeleton from '../../../src/components/Skeleton';
 import { fetchCountries, type CountrySummary } from '../../../src/api/client';
+import DemoMap, { MapHandle } from '../../../src/services/map';
 import { THUMB_JAPAN, THUMB_BALI, THUMB_GOA } from '../../../src/assets/imagesBase64';
 import { seedIfNeeded } from '../../../src/demo/seed';
+import { getCachedImage } from '../../../src/services/imageCache';
+import Skeleton from '../../../src/components/Skeleton';
 
 const FILTERS = [
   { id: 'distance', label: 'Distance', icon: 'location-outline' },

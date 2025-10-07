@@ -47,7 +47,7 @@ export default function TripHome() {
   }, []);
 
   const handleCountrySelect = (country: string) => {
-    router.push(`/(tabs)/trip/questionnaire?country=${encodeURIComponent(country)}`);
+    router.push(`/trip/questionnaire?country=${encodeURIComponent(country)}`);
   };
 
   return (

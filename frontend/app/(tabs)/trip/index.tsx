@@ -22,6 +22,8 @@ export default function TripHome() {
   const [countries, setCountries] = useState<CountrySummary[]>([]);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [showContributors, setShowContributors] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
 
   useEffect(() => {
     const loadData = async () => {

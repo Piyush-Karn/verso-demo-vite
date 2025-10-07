@@ -72,8 +72,11 @@ export default function OrganizeHome() {
           <TouchableOpacity onPress={() => router.push('/organize/interests')} style={styles.interestsBtn}>
             <Text style={styles.interestsText}>Your Interests</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/explore')} style={styles.exploreBtn}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} style={styles.exploreBtn}>
             <Text style={styles.exploreText}>Explore</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/trip')} style={styles.tripBtn}>
+            <Text style={styles.tripText}>Your Trip</Text>
           </TouchableOpacity>
           {picked && (
             <TouchableOpacity onPress={() => setPicked(null)} style={styles.backAllBtn}>

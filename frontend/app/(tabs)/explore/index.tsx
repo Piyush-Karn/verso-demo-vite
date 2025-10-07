@@ -132,6 +132,14 @@ export default function ExploreHome() {
   );
 }
 
+function FadeRow({ children, dim }: { children: React.ReactNode; dim: boolean }) {
+  const anim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    Animated.timing(anim, { toValue: dim ? 0.35 : 1, duration: 220, useNativeDriver: true }).start();
+  }, [dim, anim]);
+  return <Animated.View style={{ opacity: anim }}>{children}</Animated.View>;
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0b0b0b' },
   header: { paddingTop: 24, paddingHorizontal: 16, paddingBottom: 16 },

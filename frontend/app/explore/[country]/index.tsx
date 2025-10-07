@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'rea
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { getCachedImage } from '../../../../src/services/imageCache';
-import Skeleton from '../../../../src/components/Skeleton';
+import { getCachedImage } from '../../../src/services/imageCache';
+import Skeleton from '../../../src/components/Skeleton';
 
 const COUNTRY_DATA: Record<string, {
   flag: string;

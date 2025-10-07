@@ -326,14 +326,14 @@ export default function TripItinerary() {
       <View style={styles.bottomActions}>
         <TouchableOpacity 
           style={styles.actionBtn}
-          onPress={() => router.push(`/(tabs)/trip/hotels?country=${encodeURIComponent(String(country))}`)}
+          onPress={() => router.push(`/trip/hotels?country=${encodeURIComponent(String(country))}`)}
         >
           <Ionicons name="bed-outline" size={20} color="#e6e1d9" />
           <Text style={styles.actionText}>Hotels</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.actionBtn}
-          onPress={() => router.push(`/(tabs)/trip/cafes?country=${encodeURIComponent(String(country))}`)}
+          onPress={() => router.push(`/trip/cafes?country=${encodeURIComponent(String(country))}`)}
         >
           <Ionicons name="cafe-outline" size={20} color="#e6e1d9" />
           <Text style={styles.actionText}>Cafes</Text>

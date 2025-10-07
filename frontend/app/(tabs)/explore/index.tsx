@@ -9,102 +9,59 @@ import { seedIfNeeded } from '../../../src/demo/seed';
 import { getCachedImage } from '../../../src/services/imageCache';
 import Skeleton from '../../../src/components/Skeleton';
 
-const FILTERS = [
-  { id: 'distance', label: 'Distance', icon: 'location-outline' },
-  { id: 'time', label: 'Time/Season', icon: 'time-outline' },
-  { id: 'theme', label: 'Theme', icon: 'color-palette-outline' },
-  { id: 'lucky', label: "I'm feeling lucky", icon: 'dice-outline' },
-];
+const staticThumb: Record<string, string> = { Japan: THUMB_JAPAN, Bali: THUMB_BALI, Goa: THUMB_GOA };
 
-const THEMES = [
-  'Beach', 'Mountain', 'Wildlife', 'Concert', 'Cultural', 'Adventure', 'Food & Drink', 'Nightlife'
-];
-
-const SAMPLE_DESTINATIONS = [
-  {
-    id: '1',
-    name: 'Tropical Bali',
-    description: 'Perfect beaches and cultural temples',
-    theme: 'Beach',
-    season: 'Best in April-September',
-    distance: '12 hours from home',
-    imageQuery: 'Bali tropical beach temple aerial'
-  },
-  {
-    id: '2', 
-    name: 'Mountain Japan',
-    description: 'Cherry blossoms and ancient traditions',
-    theme: 'Cultural',
-    season: 'Best in March-May',
-    distance: '14 hours from home',
-    imageQuery: 'Japan cherry blossom mountain temple'
-  },
-  {
-    id: '3',
-    name: 'Coastal Goa',
-    description: 'Vibrant beaches and Portuguese heritage', 
-    theme: 'Beach',
-    season: 'Best in November-March',
-    distance: '8 hours from home',
-    imageQuery: 'Goa coastal beach palm trees sunset'
-  }
-];
+const queryForCountry = (c: string) => {
+  if (c === 'Bali') return 'Bali turquoise beach aerial';
+  if (c === 'Japan') return 'Japan mountain lake sunrise';
+  if (c === 'Goa') return 'Goa beach sunset palm trees';
+  return `${c} travel landscape`;
+};
 
 export default function ExploreHome() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [countries, setCountries] = useState<CountrySummary[]>([]);
+  const [thumbs, setThumbs] = useState<Record<string, string>>({});
+  const [picked, setPicked] = useState<string | null>(null);
+  const tries = useRef(0);
+  const polling = useRef<NodeJS.Timeout | null>(null);
   const mapRef = useRef<MapHandle>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [showThemeModal, setShowThemeModal] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [destinations, setDestinations] = useState(SAMPLE_DESTINATIONS);
-  const [destinationImages, setDestinationImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Load destination images
-    const loadImages = async () => {
-      const imagePromises = destinations.map(async (dest) => {
-        const image = await getCachedImage(dest.imageQuery);
-        return { id: dest.id, image };
-      });
-      const results = await Promise.all(imagePromises);
-      const imageMap: Record<string, string> = {};
-      results.forEach((result) => {
-        if (result.image) {
-          imageMap[result.id] = result.image;
+    seedIfNeeded();
+    const run = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchCountries();
+        setCountries(data);
+        if (data.length === 0 && tries.current < 10) {
+          tries.current += 1;
+          polling.current = setTimeout(run, 2000);
+        } else {
+          const results = await Promise.all(
+            data.map(async (c) => ({ key: c.country, val: await getCachedImage(queryForCountry(c.country)) }))
+          );
+          const next: Record<string, string> = {};
+          results.forEach((r) => { if (r.val) next[r.key] = r.val; });
+          setThumbs(next);
         }
-      });
-      setDestinationImages(imageMap);
+      } catch (e: any) {
+        setError(e?.message || 'Failed to load');
+      } finally {
+        setLoading(false);
+      }
     };
-    loadImages();
+    run();
+    return () => { if (polling.current) clearTimeout(polling.current); };
   }, []);
 
-  const filteredDestinations = destinations.filter((dest) => {
-    if (searchQuery && !dest.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !dest.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    if (selectedTheme && dest.theme !== selectedTheme) {
-      return false;
-    }
-    return true;
-  });
+  const countryNames = useMemo(() => countries.map((c) => c.country), [countries]);
 
-  const handleFilterPress = (filterId: string) => {
-    if (filterId === 'theme') {
-      setShowThemeModal(true);
-    } else if (filterId === 'lucky') {
-      // Shuffle destinations
-      const shuffled = [...destinations].sort(() => Math.random() - 0.5);
-      setDestinations(shuffled);
-    }
-    setActiveFilter(filterId === activeFilter ? null : filterId);
-  };
-
-  const handleDestinationPress = (destination: any) => {
-    const countryName = destination.name.split(' ')[1]; // Extract country name
-    router.push(`/explore/${encodeURIComponent(countryName)}`);
-  };
+  const onPick = (c: string) => { setPicked(c); mapRef.current?.flyToCountry(c); };
+  const onNavigate = () => { if (picked) router.push(`/organize/${encodeURIComponent(picked)}?focus=1`); };
+  const onCardPress = (c: string) => onPick(c);
 
   return (
     <View style={styles.container}>

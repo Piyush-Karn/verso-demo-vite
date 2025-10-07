@@ -65,118 +65,69 @@ export default function ExploreHome() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Explore</Text>
-        <Text style={styles.subtitle}>Discover your next adventure</Text>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#9aa0a6" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Where do you want to go?"
-          placeholderTextColor="#9aa0a6"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      {/* Map */}
-      <View style={styles.mapContainer}>
-        <DemoMap ref={mapRef} countries={['Bali', 'Japan', 'Goa']} onSelectCountry={() => {}} />
-      </View>
-
-      {/* Filter Buttons */}
-      <View style={styles.filtersContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersContent}>
-          {FILTERS.map((filter) => (
-            <TouchableOpacity
-              key={filter.id}
-              style={[styles.filterBtn, activeFilter === filter.id && styles.filterBtnActive]}
-              onPress={() => handleFilterPress(filter.id)}
-            >
-              <Ionicons 
-                name={filter.icon as any} 
-                size={16} 
-                color={activeFilter === filter.id ? '#0b0b0b' : '#e5e7eb'} 
-                style={{ marginRight: 6 }} 
-              />
-              <Text style={[styles.filterText, activeFilter === filter.id && styles.filterTextActive]}>
-                {filter.label}
-              </Text>
+      <View style={styles.headerBar}>
+        <Text style={styles.greeting}>Hello, Explorer</Text>
+        <Text style={styles.subtle}>{countries.reduce((a, c) => a + c.count, 0)} Collections saved across {countries.length} Countries</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+          <TouchableOpacity onPress={() => router.push('/organize/interests')} style={styles.interestsBtn}>
+            <Text style={styles.interestsText}>Your Interests</Text>
+          </TouchableOpacity>
+          {picked && (
+            <TouchableOpacity onPress={() => setPicked(null)} style={styles.backAllBtn}>
+              <Text style={styles.backAllText}>Back to all</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Destinations Grid */}
-      <ScrollView style={styles.destinationsContainer} contentContainerStyle={styles.destinationsContent}>
-        {filteredDestinations.map((destination) => {
-          const image = destinationImages[destination.id];
-          return (
-            <TouchableOpacity
-              key={destination.id}
-              style={styles.destinationCard}
-              onPress={() => handleDestinationPress(destination)}
-            >
-              {image ? (
-                <Image 
-                  source={{ uri: `data:image/jpeg;base64,${image}` }} 
-                  style={styles.destinationImage} 
-                  contentFit="cover" 
-                />
-              ) : (
-                <Skeleton style={styles.destinationImage} />
-              )}
-              <View style={styles.destinationInfo}>
-                <Text style={styles.destinationName}>{destination.name}</Text>
-                <Text style={styles.destinationDescription}>{destination.description}</Text>
-                <View style={styles.destinationMeta}>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="time-outline" size={12} color="#9aa0a6" />
-                    <Text style={styles.metaText}>{destination.season}</Text>
-                  </View>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="location-outline" size={12} color="#9aa0a6" />
-                    <Text style={styles.metaText}>{destination.distance}</Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
-      {/* Theme Selection Modal */}
-      <Modal visible={showThemeModal} animationType="slide" transparent onRequestClose={() => setShowThemeModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modal}>
-            <View style={styles.modalDrag} />
-            <Text style={styles.modalTitle}>Select Theme</Text>
-            <View style={styles.themeGrid}>
-              {THEMES.map((theme) => (
-                <TouchableOpacity
-                  key={theme}
-                  style={[styles.themeOption, selectedTheme === theme && styles.themeOptionActive]}
-                  onPress={() => {
-                    setSelectedTheme(selectedTheme === theme ? null : theme);
-                    setShowThemeModal(false);
-                  }}
-                >
-                  <Text style={[styles.themeText, selectedTheme === theme && styles.themeTextActive]}>
-                    {theme}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowThemeModal(false)}>
-              <Text style={styles.modalCloseText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+          )}
         </View>
-      </Modal>
+      </View>
+
+      <View style={{ alignItems: 'center', paddingVertical: 8 }}>
+        <DemoMap ref={mapRef} countries={countryNames} onSelectCountry={onPick} />
+      </View>
+
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator color="#888" />
+          <Text style={styles.priming}>If this is your first load, we are priming demo content. This can take ~20–40s.</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.center}><Text style={styles.error}>{error}</Text></View>
+      ) : (
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Text style={styles.sectionTitle}>Your Collections</Text>
+          {countries.map((c) => {
+            const base64 = thumbs[c.country] || staticThumb[c.country] || THUMB_JAPAN;
+            const dim = picked && c.country !== picked;
+            return (
+              <FadeRow key={c.country} dim={dim}>
+                <TouchableOpacity style={[styles.card, dim && styles.cardDimmed]} onPress={() => onCardPress(c.country)}>
+                  {base64 ? (
+                    <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.thumb} contentFit="cover" />
+                  ) : (
+                    <Skeleton style={styles.thumb} />
+                  )}
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.cardTitle, dim && styles.cardTitleDimmed]}>{c.country}</Text>
+                    <Text style={[styles.cardMeta, dim && styles.cardMetaDimmed]}>{c.count} Inspirations</Text>
+                  </View>
+                  <Text style={[styles.arrow, dim && styles.arrowDimmed]}>›</Text>
+                </TouchableOpacity>
+              </FadeRow>
+            );
+          })}
+        </ScrollView>
+      )}
+
+      {picked ? (
+        <View style={styles.bigCtaBar}>
+          <TouchableOpacity style={styles.bigCtaBtn} onPress={onNavigate}>
+            <Text style={styles.bigCtaText}>Take me to {picked}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity style={styles.fab} onPress={() => router.push('/add')}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

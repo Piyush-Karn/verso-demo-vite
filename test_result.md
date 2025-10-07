@@ -119,20 +119,20 @@
 ##         -comment: "Comprehensive backend testing completed successfully. All 11 test cases passed: Health check (GET /api/), Status CRUD (POST/GET /api/status), Inspirations CRUD with filtering (POST/GET /api/inspirations), Collections summary (GET /api/collections/summary), Country cities (GET /api/collections/{country}/cities), City items (GET /api/city/{country}/{city}/items), and negative validation tests. All endpoints working correctly with proper data validation, filtering, and error handling."
 ##
 ## frontend:
-##   - task: "Implement Landing + Auth + Organize flows (expo-router)"
+##   - task: "Fix Bottom Navigation Structure"
 ##     implemented: true
 ##     working: false
-##     file: "/app/frontend/app/*"
+##     file: "/app/frontend/app/(tabs)/_layout.tsx"
 ##     stuck_count: 1
 ##     priority: "high"
 ##     needs_retesting: true
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "main"
-##         -comment: "Planned. Awaiting Google OAuth client IDs from user to wire real sign-in."
+##         -comment: "User reported bottom navigation showing too many tabs instead of only 'Explore' and 'Your Trip'"
 ##         -working: false
-##         -agent: "user"
-##         -comment: "User reported multiple issues: 1) City tab not clickable when on Things to Do tab 2) Thumbnails in Things to Do and Season Guide not loading and not clickable 3) Need month selection dropdown for Season Guide 4) Need category deep dive views for Things to Do categories (beaches, diving, surfing, cafes) with multiple items per category"
+##         -agent: "main"
+##         -comment: "Fixed bottom navigation layout to show only 2 tabs. Restructured file organization: (tabs)/_layout.tsx defines 2 tabs, explore/index.tsx shows collections view, moved sub-routes outside tabs directory. Current issue: import path errors after file restructuring causing module resolution failures."
 ##   - task: "Fix Things to Do category navigation and thumbnails"
 ##     implemented: false
 ##     working: "NA"

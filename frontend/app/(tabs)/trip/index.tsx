@@ -60,13 +60,10 @@ export default function TripHome() {
 
       {/* Collections Prompt */}
       <View style={styles.promptSection}>
-        <View style={styles.promptCard}>
-          <Ionicons name="map-outline" size={32} color="#e6e1d9" />
-          <Text style={styles.promptTitle}>Ready to plan?</Text>
-          <Text style={styles.promptText}>
-            Choose a collection below to build your trip from your saved inspirations
-          </Text>
-        </View>
+        <Text style={styles.promptTitle}>Ready to plan?</Text>
+        <Text style={styles.promptText}>
+          Choose a collection below to build your trip from your saved inspirations
+        </Text>
       </View>
 
       {/* Collections */}

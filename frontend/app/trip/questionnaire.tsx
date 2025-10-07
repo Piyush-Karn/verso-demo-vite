@@ -95,7 +95,7 @@ export default function TripQuestionnaire() {
     // Simulate AI generation
     setTimeout(() => {
       setIsGenerating(false);
-      router.push(`/(tabs)/trip/itinerary?country=${encodeURIComponent(selectedCountry)}&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&travelers=${travelerType}`);
+      router.push(`/trip/itinerary?country=${encodeURIComponent(selectedCountry)}&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&travelers=${travelerType}`);
     }, 3000);
   };
 

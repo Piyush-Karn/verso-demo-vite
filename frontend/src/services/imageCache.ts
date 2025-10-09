@@ -1,15 +1,32 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBase64ForPlace } from './imageProvider';
 
 const TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
 const KEY = (q: string) => `img:${q.toLowerCase()}`;
 const META = (q: string) => `imgmeta:${q.toLowerCase()}`;
 
+// Web localStorage wrapper to match AsyncStorage API
+const storage = {
+  getItem: async (key: string): Promise<string | null> => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // ignore
+    }
+  }
+};
+
 export async function getCachedImage(query: string): Promise<string | null> {
   try {
     const k = KEY(query);
     const m = META(query);
-    const [cached, meta] = await Promise.all([AsyncStorage.getItem(k), AsyncStorage.getItem(m)]);
+    const [cached, meta] = await Promise.all([storage.getItem(k), storage.getItem(m)]);
     const now = Date.now();
     const ts = meta ? Number(meta) : 0;
 
@@ -17,7 +34,7 @@ export async function getCachedImage(query: string): Promise<string | null> {
 
     const base64 = await getBase64ForPlace(query);
     if (base64) {
-      await Promise.all([AsyncStorage.setItem(k, base64), AsyncStorage.setItem(m, String(now))]);
+      await Promise.all([storage.setItem(k, base64), storage.setItem(m, String(now))]);
       return base64;
     }
 

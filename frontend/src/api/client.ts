@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const base = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+const base = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
 // All backend API routes MUST be prefixed with '/api'
 export const API_BASE = `${base}/api`;
 

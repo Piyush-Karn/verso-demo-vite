@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8001',"vscode-65da4f5a-010b-4824-8ff6-da4decb59d46.preview.emergentagent.com",
+        target: 'http://localhost:8001',
         changeOrigin: true,
         secure: false,
       }

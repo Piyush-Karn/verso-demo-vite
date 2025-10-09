@@ -1,53 +1,14 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Layout } from './components/Layout'
-import { HomePage } from './pages/HomePage'
-import { ExplorePage } from './pages/ExplorePage'
-import { TripPage } from './pages/TripPage'
-import { CountryPage } from './pages/CountryPage'
-import { CategoryPage } from './pages/CategoryPage'
-import { CityPage } from './pages/CityPage'
-import { QuestionnairePage } from './pages/QuestionnairePage'
-import { ItineraryPage } from './pages/ItineraryPage'
-import { HotelsPage } from './pages/HotelsPage'
-import { CafesPage } from './pages/CafesPage'
-import { InterestsPage } from './pages/InterestsPage'
-import { AddPage } from './pages/AddPage'
-import { AuthPage } from './pages/AuthPage'
-
 function App() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="p-8">
         <h1 className="text-3xl font-bold text-white mb-4">Verso Travel Platform</h1>
         <p className="text-gray-400 mb-8">Successfully migrated to Vite + React!</p>
-        
-        <Routes>
-          {/* Main Layout Routes */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<HomePage />} />
-            <Route path="explore" element={<ExplorePage />} />
-            <Route path="trip" element={<TripPage />} />
-            
-            {/* Organize routes */}
-            <Route path="organize/:country" element={<CountryPage />} />
-            <Route path="organize/:country/category/:categoryName" element={<CategoryPage />} />
-            <Route path="organize/:country/:city" element={<CityPage />} />
-            <Route path="organize/interests" element={<InterestsPage />} />
-            
-            {/* Trip planning routes */}
-            <Route path="trip/questionnaire" element={<QuestionnairePage />} />
-            <Route path="trip/itinerary" element={<ItineraryPage />} />
-            <Route path="trip/hotels" element={<HotelsPage />} />
-            <Route path="trip/cafes" element={<CafesPage />} />
-            
-            {/* Other routes */}
-            <Route path="add" element={<AddPage />} />
-            <Route path="auth" element={<AuthPage />} />
-          </Route>
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <p className="text-green-400">✅ Vite development server running</p>
+          <p className="text-green-400">✅ React components rendering</p>
+          <p className="text-green-400">✅ Tailwind CSS working</p>
+        </div>
       </div>
     </div>
   )

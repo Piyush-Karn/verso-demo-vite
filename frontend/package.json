@@ -9,16 +9,17 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "axios": "^1.12.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "expo": "^54.0.13",
+    "lucide-react": "^0.294.0",
+    "mapbox-gl": "^3.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "axios": "^1.12.2",
-    "zustand": "^5.0.8",
-    "mapbox-gl": "^3.15.0",
-    "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0",
-    "class-variance-authority": "^0.7.0"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

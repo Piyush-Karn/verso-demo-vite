@@ -1,0 +1,15 @@
+# Netlify configuration file
+
+# Build settings (these should match your UI settings)
+[build]
+  command = "npm run build"
+  publish = "dist"
+  
+# Secrets scanning settings
+[build.processing.secrets]
+  # Tell the scanner to ignore these specific, public API keys
+  omit_keys = [
+    "VITE_MAPBOX_TOKEN", 
+    "VITE_PEXELS_API_KEY", 
+    "VITE_UNSPLASH_ACCESS_KEY"
+  ]

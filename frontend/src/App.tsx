@@ -1,4 +1,3 @@
-import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { HomePage } from './pages/HomePage'
@@ -17,7 +16,7 @@ import { AuthPage } from './pages/AuthPage'
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen">
       <Routes>
         {/* Main Layout Routes */}
         <Route path="/" element={<Layout />}>

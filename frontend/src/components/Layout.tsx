@@ -13,18 +13,18 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto pb-16">
         <Outlet />
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 px-4 py-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 px-4 py-3">
         <div className="flex items-center justify-around max-w-md mx-auto">
           <button
             onClick={() => navigate('/')}
             className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
-              isActivePath('/') && !isActivePath('/trip') && !isActivePath('/explore')
-                ? 'text-secondary bg-gray-800' 
+              location.pathname === '/'
+                ? 'text-yellow-400 bg-gray-800' 
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -36,7 +36,7 @@ export const Layout: React.FC = () => {
             onClick={() => navigate('/trip')}
             className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
               isActivePath('/trip')
-                ? 'text-secondary bg-gray-800' 
+                ? 'text-yellow-400 bg-gray-800' 
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -45,9 +45,6 @@ export const Layout: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Bottom padding to account for fixed navigation */}
-      <div className="h-16" />
     </div>
   )
 }

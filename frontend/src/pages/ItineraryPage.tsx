@@ -13,7 +13,6 @@ export const ItineraryPage: React.FC = () => {
   const homeLocation = searchParams.get('homeLocation') || 'Your City'
   const duration = searchParams.get('duration') || '7'
 
-  // Mock itinerary data
   const mockItinerary = [
     {
       day: 1,
@@ -36,9 +35,9 @@ export const ItineraryPage: React.FC = () => {
   ]
 
   return (
-    <div className="flex-1 bg-gray-900 text-white min-h-screen">
+    <div className="flex-1 bg-black text-white min-h-screen">
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b border-gray-700">
+      <div className="flex items-center gap-4 p-4 border-b border-gray-800">
         <button onClick={() => navigate(-1)} className="p-2">
           <ArrowLeft size={24} />
         </button>
@@ -49,9 +48,9 @@ export const ItineraryPage: React.FC = () => {
       </div>
 
       {/* Trip Summary */}
-      <div className="p-4 bg-gray-800 m-4 rounded-lg">
+      <div className="p-4 bg-gray-900 m-4 rounded-lg">
         <div className="flex items-center gap-2 mb-2">
-          <Calendar size={16} className="text-yellow-400" />
+          <Calendar size={16} className="text-white" />
           <span className="font-medium">Trip Overview</span>
         </div>
         <div className="text-sm text-gray-300 space-y-1">
@@ -65,7 +64,7 @@ export const ItineraryPage: React.FC = () => {
       {/* Journey Timeline */}
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <MapPin size={20} className="text-yellow-400" />
+          <MapPin size={20} className="text-white" />
           Your Journey
         </h2>
         
@@ -74,7 +73,7 @@ export const ItineraryPage: React.FC = () => {
             <div key={day.day} className="flex items-start gap-4">
               {/* Transport Icon */}
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black">
                   {day.transport === 'flight' ? (
                     <Plane size={20} />
                   ) : (
@@ -82,12 +81,12 @@ export const ItineraryPage: React.FC = () => {
                   )}
                 </div>
                 {index < mockItinerary.length - 1 && (
-                  <div className="w-0.5 h-16 bg-gray-600 mt-2" />
+                  <div className="w-0.5 h-16 bg-gray-700 mt-2" />
                 )}
               </div>
 
               {/* Day Content */}
-              <div className="flex-1 bg-gray-800 rounded-lg p-4">
+              <div className="flex-1 bg-gray-900 rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold">Day {day.day}</h3>
                   <span className="text-sm text-gray-400">{day.city}</span>
@@ -107,20 +106,20 @@ export const ItineraryPage: React.FC = () => {
       <div className="p-4 space-y-3 pb-20">
         <button 
           onClick={() => navigate(`/trip/hotels?country=${country}`)}
-          className="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           🏨 Find Hotels
         </button>
         
         <button 
           onClick={() => navigate(`/trip/cafes?country=${country}`)}
-          className="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           ☕ Discover Cafes & Food
         </button>
         
         <button 
-          className="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold py-4 rounded-full transition-colors"
+          className="w-full bg-white hover:bg-gray-200 text-black font-bold py-4 rounded-full transition-colors"
         >
           Confirm Itinerary
         </button>

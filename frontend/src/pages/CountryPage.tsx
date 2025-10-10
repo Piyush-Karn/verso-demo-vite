@@ -44,16 +44,16 @@ export const CountryPage: React.FC = () => {
 
   if (!country || !countryData) {
     return (
-      <div className="flex-1 bg-gray-900 text-white p-4">
+      <div className="flex-1 bg-black text-white p-4">
         <p className="text-red-400">Country not found</p>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 bg-gray-900 text-white min-h-screen">
+    <div className="flex-1 bg-black text-white min-h-screen">
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b border-gray-700">
+      <div className="flex items-center gap-4 p-4 border-b border-gray-800">
         <button onClick={() => navigate(-1)} className="p-2">
           <ArrowLeft size={24} />
         </button>
@@ -64,15 +64,15 @@ export const CountryPage: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-gray-700">
+      <div className="flex border-b border-gray-800">
         {['cities', 'categories', 'seasons'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
             className={`flex-1 py-3 px-4 capitalize ${
               activeTab === tab 
-                ? 'border-b-2 border-yellow-400 text-yellow-400' 
-                : 'text-gray-400'
+                ? 'border-b-2 border-white text-white' 
+                : 'text-gray-500'
             }`}
           >
             {tab === 'categories' ? 'Things to do' : tab}
@@ -88,9 +88,9 @@ export const CountryPage: React.FC = () => {
               <button
                 key={city}
                 onClick={() => navigate(`/organize/${country}/${city}`)}
-                className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors"
+                className="bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition-colors"
               >
-                <MapPin className="mx-auto mb-2 text-yellow-400" size={24} />
+                <MapPin className="mx-auto mb-2 text-white" size={24} />
                 <h3 className="font-semibold">{city}</h3>
               </button>
             ))}
@@ -103,9 +103,9 @@ export const CountryPage: React.FC = () => {
               <button
                 key={category}
                 onClick={() => navigate(`/organize/${country}/category/${category}`)}
-                className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors"
+                className="bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition-colors"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mx-auto mb-2"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg mx-auto mb-2"></div>
                 <h3 className="font-semibold">{category}</h3>
               </button>
             ))}
@@ -115,15 +115,15 @@ export const CountryPage: React.FC = () => {
         {activeTab === 'seasons' && (
           <div className="space-y-4">
             {countryData.seasons.map((season: any) => (
-              <div key={season.month} className="bg-gray-800 rounded-lg p-4">
+              <div key={season.month} className="bg-gray-900 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar size={20} className="text-yellow-400" />
+                  <Calendar size={20} className="text-white" />
                   <h3 className="font-semibold">{season.month}</h3>
                 </div>
                 <p className="text-gray-300 mb-2">{season.highlight}</p>
                 <div className="flex flex-wrap gap-2">
                   {season.activities.map((activity: string) => (
-                    <span key={activity} className="bg-gray-700 px-2 py-1 rounded text-sm">
+                    <span key={activity} className="bg-gray-800 px-2 py-1 rounded text-sm">
                       {activity}
                     </span>
                   ))}
@@ -138,7 +138,7 @@ export const CountryPage: React.FC = () => {
       <div className="fixed bottom-20 left-4 right-4">
         <button 
           onClick={() => navigate(`/trip/questionnaire?country=${encodeURIComponent(country)}`)}
-          className="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold py-4 rounded-full transition-colors"
+          className="w-full bg-white hover:bg-gray-200 text-black font-bold py-4 rounded-full transition-colors"
         >
           Plan Your Trip to {country}
         </button>

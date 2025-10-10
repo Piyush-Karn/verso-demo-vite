@@ -13,12 +13,12 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 overflow-auto pb-16">
+      <div className="flex-1 overflow-auto pb-20">
         <Outlet />
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 px-4 py-3 z-50">
         <div className="flex items-center justify-around max-w-md mx-auto">
           <button
             onClick={() => navigate('/')}

@@ -35,9 +35,9 @@ export const QuestionnairePage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 bg-gray-900 text-white min-h-screen">
+    <div className="flex-1 bg-black text-white min-h-screen">
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b border-gray-700">
+      <div className="flex items-center gap-4 p-4 border-b border-gray-800">
         <button onClick={() => navigate(-1)} className="p-2">
           <ArrowLeft size={24} />
         </button>
@@ -45,14 +45,14 @@ export const QuestionnairePage: React.FC = () => {
       </div>
 
       <div className="p-4 space-y-6">
-        {/* Destination - only show if not pre-selected */}
+        {/* Destination */}
         {!preSelectedCountry && (
           <div>
             <label className="block text-sm font-medium mb-2">Where would you like to go?</label>
             <select
               value={formData.destination}
               onChange={(e) => setFormData({...formData, destination: e.target.value})}
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white"
             >
               <option value="">Select a destination</option>
               {countries.map(country => (
@@ -75,7 +75,7 @@ export const QuestionnairePage: React.FC = () => {
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white"
                 required
               />
             </div>
@@ -85,24 +85,23 @@ export const QuestionnairePage: React.FC = () => {
                 type="date"
                 value={formData.endDate}
                 onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white"
                 required
               />
             </div>
           </div>
         </div>
 
-        {/* Optional Trip Details */}
-        <div className="space-y-4 border-t border-gray-700 pt-6">
+        {/* Optional Details */}
+        <div className="space-y-4 border-t border-gray-800 pt-6">
           <h3 className="text-lg font-medium text-gray-300">Optional Details</h3>
           
-          {/* Trip Duration */}
           <div>
             <label className="block text-sm font-medium mb-2">I want to travel for ___ days</label>
             <select
               value={formData.tripDuration}
               onChange={(e) => setFormData({...formData, tripDuration: e.target.value})}
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white"
             >
               {durationOptions.map(duration => (
                 <option key={duration} value={duration}>{duration} days</option>
@@ -110,7 +109,6 @@ export const QuestionnairePage: React.FC = () => {
             </select>
           </div>
 
-          {/* Travelers */}
           <div>
             <label className="block text-sm font-medium mb-2 flex items-center gap-2">
               <Users size={16} />
@@ -119,7 +117,7 @@ export const QuestionnairePage: React.FC = () => {
             <select
               value={formData.travelers}
               onChange={(e) => setFormData({...formData, travelers: e.target.value})}
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white"
             >
               {travelerOptions.map(option => (
                 <option key={option} value={option}>{option} {option === '1' ? 'person' : 'people'}</option>
@@ -127,7 +125,6 @@ export const QuestionnairePage: React.FC = () => {
             </select>
           </div>
 
-          {/* Home Location */}
           <div>
             <label className="block text-sm font-medium mb-2 flex items-center gap-2">
               <MapPin size={16} />
@@ -138,7 +135,7 @@ export const QuestionnairePage: React.FC = () => {
               value={formData.homeLocation}
               onChange={(e) => setFormData({...formData, homeLocation: e.target.value})}
               placeholder="Enter your home city"
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
             />
           </div>
         </div>
@@ -149,7 +146,7 @@ export const QuestionnairePage: React.FC = () => {
         <button 
           onClick={handleSubmit}
           disabled={!formData.destination || !formData.startDate || !formData.endDate}
-          className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-700 disabled:text-gray-400 text-gray-900 font-bold py-4 rounded-full transition-colors"
+          className="w-full bg-white hover:bg-gray-200 disabled:bg-gray-800 disabled:text-gray-500 text-black font-bold py-4 rounded-full transition-colors"
         >
           Continue to Itinerary
         </button>

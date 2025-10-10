@@ -5,7 +5,7 @@ export const CityPage: React.FC = () => {
   const { country, city } = useParams()
   
   return (
-    <div className="flex-1 bg-gray-900 text-white p-4">
+    <div className="flex-1 bg-black text-white p-4">
       <h1 className="text-2xl font-bold mb-4">{city}, {country}</h1>
       <p className="text-gray-400">City details page - Coming soon</p>
     </div>

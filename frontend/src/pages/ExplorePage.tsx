@@ -44,7 +44,7 @@ export const ExplorePage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 bg-gray-900 text-white min-h-screen">
+    <div className="flex-1 bg-black text-white min-h-screen">
       {/* Header */}
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-2">Explore</h1>
@@ -54,7 +54,7 @@ export const ExplorePage: React.FC = () => {
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
-            className="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            className="w-full bg-gray-900 text-white pl-10 pr-4 py-3 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
             placeholder="Where do you want to go?"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -66,7 +66,7 @@ export const ExplorePage: React.FC = () => {
           {['Distance', 'Time/Season', 'Theme', "I'm feeling lucky"].map((filter) => (
             <button
               key={filter}
-              className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full whitespace-nowrap text-sm"
+              className="flex items-center gap-2 bg-gray-900 px-4 py-2 rounded-full whitespace-nowrap text-sm hover:bg-gray-800"
             >
               <Filter size={14} />
               {filter}
@@ -77,7 +77,7 @@ export const ExplorePage: React.FC = () => {
 
       {/* Map Placeholder */}
       <div className="mx-4 mb-4">
-        <div className="h-40 bg-gray-800 rounded-lg flex items-center justify-center">
+        <div className="h-40 bg-gray-900 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <MapPin className="mx-auto mb-2 text-gray-400" size={32} />
             <span className="text-gray-400">Interactive Map</span>
@@ -92,19 +92,19 @@ export const ExplorePage: React.FC = () => {
           {filteredDestinations.map((destination) => (
             <button
               key={destination.id}
-              className="w-full bg-gray-800 rounded-2xl p-4 hover:bg-gray-700 transition-colors"
+              className="w-full bg-gray-900 rounded-2xl p-4 hover:bg-gray-800 transition-colors"
               onClick={() => handleDestinationPress(destination)}
             >
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">
+                <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold">
                   {destination.name.split(' ')[1]?.slice(0, 2).toUpperCase() || destination.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="text-white text-lg font-semibold">{destination.name}</h3>
                   <p className="text-gray-300 text-sm mb-2">{destination.description}</p>
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="bg-gray-700 px-2 py-1 rounded text-gray-300">{destination.season}</span>
-                    <span className="bg-gray-700 px-2 py-1 rounded text-gray-300">{destination.distance}</span>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-gray-300">{destination.season}</span>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-gray-300">{destination.distance}</span>
                   </div>
                 </div>
               </div>

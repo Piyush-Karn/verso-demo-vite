@@ -1,71 +1,86 @@
 import React, { useRef, useEffect, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { MapboxError } from 'mapbox-gl';
+import { COUNTRY_COORDS } from '../services/geo';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-const GEOAPIFY_KEY = import.meta.env.VITE_GEOAPIFY_KEY;
+if (MAPBOX_TOKEN) {
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+}
 
-export const InteractiveMap: React.FC = () => {
+interface InteractiveMapProps {
+  selectedCountry: string | null;
+}
+
+export const InteractiveMap: React.FC<InteractiveMapProps> = ({ selectedCountry }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxFailed, setMapboxFailed] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!MAPBOX_TOKEN) {
-      console.error("Mapbox token is missing. Falling back...");
-      setMapboxFailed(true);
-      return;
+    if (map.current || !mapContainer.current || !MAPBOX_TOKEN) return;
+
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        projection: { name: 'globe' },
+        zoom: 1.5,
+        center: [90, 28],
+        attributionControl: false
+      });
+
+      map.current.on('style.load', () => {
+        if (map.current) {
+          map.current.setFog({
+            color: 'rgb(220, 230, 240)',
+            'high-color': 'rgb(120, 150, 200)',
+            'horizon-blend': 0.05,
+            'space-color': 'rgb(15, 20, 35)',
+            'star-intensity': 0.5
+          });
+        }
+      });
+
+      map.current.on('error', (e: { error: MapboxError }) => {
+        setMapError(e.error?.message || 'An unknown map error occurred.');
+      });
+      
+    } catch (error) {
+      setMapError(error instanceof Error ? error.message : 'Failed to initialize map.');
     }
-    
-    if (map.current || !mapContainer.current) return; // Initialize map only once
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11', // Dark theme for the map
-      projection: { name: 'globe' }, // This creates the earth view
-      zoom: 0.5,
-      center: [139, 35], // Start centered around Japan
-    });
-
-    map.current.on('style.load', () => {
-      if (map.current) {
-        // Add a sky layer to create the star effect
-        map.current.setFog({
-          color: 'rgb(3, 7, 18)', // Dark blue
-          'high-color': 'rgb(29, 78, 216)', // Blue horizon
-          'horizon-blend': 0.02,
-          'space-color': 'rgb(17, 24, 39)', // Starry sky color
-          'star-intensity': 0.25 // Star intensity
-        });
-      }
-    });
-
-    map.current.on('error', () => {
-      console.error("Mapbox failed to load. Falling back to Geoapify.");
-      setMapboxFailed(true);
-    });
-
+    return () => {
+      map.current?.remove();
+      map.current = null;
+    };
   }, []);
 
-  if (mapboxFailed) {
-    const geoapifyUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-carto&width=600&height=400&center=lonlat:0,0&zoom=1&apiKey=${GEOAPIFY_KEY}`;
-    return (
-      <div className="flex justify-center py-4 px-4">
-        <img 
-          src={geoapifyUrl} 
-          alt="Static world map" 
-          className="w-full h-48 rounded-2xl object-cover" 
-        />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (map.current && map.current.isStyleLoaded()) {
+      const coords = selectedCountry ? COUNTRY_COORDS[selectedCountry] : null;
+      map.current.flyTo({
+        center: coords ? (coords as [number, number]) : [90, 28],
+        zoom: coords ? 4 : 1.5,
+        essential: true,
+        duration: 2000,
+      });
+    }
+  }, [selectedCountry]);
 
   return (
-    <div className="flex justify-center py-4 px-4">
-      <div 
-        ref={mapContainer} 
-        className="w-full h-48 rounded-2xl" 
-      />
+    <div className="flex justify-center items-center h-80 w-full px-4 py-2">
+      {mapError ? (
+        <div className="w-full h-full rounded-2xl bg-gray-900 flex flex-col items-center justify-center text-center p-4">
+          <p className="text-red-400 font-semibold">Map Error</p>
+          <p className="text-gray-500 text-xs mt-2">{mapError}</p>
+        </div>
+      ) : MAPBOX_TOKEN ? (
+        <div ref={mapContainer} className="w-full h-full rounded-2xl" />
+      ) : (
+        <div className="w-full h-full rounded-2xl bg-gray-900 flex items-center justify-center">
+          <p className="text-gray-500">Mapbox token is missing.</p>
+        </div>
+      )}
     </div>
   );
 };

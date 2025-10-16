@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, ImageIcon, Sparkles } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, ImageIcon, Sparkles, Route as RouteIcon, Plane } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fetchImage } from '../services/imageService';
+import { fetchImage } from '@/services/imageService';
+
 
 // --- Mock Data ---
 const mockCountryDetails: Record<string, any> = {
@@ -35,21 +36,12 @@ const mockCountryDetails: Record<string, any> = {
   }
 };
 
+
 // --- Interfaces ---
-interface City {
-  name: string;
-  imageUrl?: string;
-}
-interface Category {
-  name: string;
-  imageUrl?: string;
-}
-interface Season {
-  month: string;
-  highlight: string;
-  activities: string[];
-  imageUrl?: string;
-}
+interface City { name: string; imageUrl?: string; }
+interface Category { name: string; imageUrl?: string; }
+interface Season { month: string; highlight: string; activities: string[]; imageUrl?: string; }
+
 
 export const CountryPage: React.FC = () => {
   const { country } = useParams<{ country: string }>();
@@ -108,25 +100,27 @@ export const CountryPage: React.FC = () => {
     );
   }
 
+  // Helper to route to Questionnaire with preselected country
+  const goToQuestionnaire = () => {
+    const q = encodeURIComponent(country);
+    navigate(`/trip/questionnaire?country=${q}`);
+  };
+
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
       {/* Static grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:64px_64px]" />
-      
       {/* Subtle radial gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_100%)]" />
 
       {/* Gradient orbs */}
       <motion.div
         className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[150px]"
-        style={{ 
-          background: 'radial-gradient(circle, #6366f1 0%, transparent 70%)',
-          opacity: 0.12,
-        }}
+        style={{ background: 'radial-gradient(circle, #6366f1 0%, transparent 70%)', opacity: 0.12 }}
         animate={{ scale: [1, 1.2, 1], opacity: [0.12, 0.15, 0.12] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
-      
+
       {/* Header */}
       <motion.div 
         className="relative z-10 p-4 md:p-6 border-b border-white/10 backdrop-blur-sm bg-black/50"
@@ -138,8 +132,8 @@ export const CountryPage: React.FC = () => {
           <motion.button 
             onClick={() => navigate(-1)} 
             className="p-2 rounded-full hover:bg-white/10 transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.98 }}
           >
             <ArrowLeft size={24} />
           </motion.button>
@@ -162,6 +156,25 @@ export const CountryPage: React.FC = () => {
               Discover your perfect experience
             </motion.p>
           </div>
+
+          {/* Desktop/Tablet CTA — medium width, same height */}
+          <motion.button
+            onClick={goToQuestionnaire}
+            className="hidden md:inline-flex rounded-full p-[2px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:to-pink-400 transition-colors"
+            whileHover={{ scale: 1.04, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            aria-label="Plan trip"
+          >
+            <span
+              className="inline-flex items-center gap-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10
+                         px-5 py-3 text-sm lg:px-6 lg:py-3 lg:text-base font-semibold text-white
+                         md:min-w-[180px] lg:min-w-[210px] xl:min-w-[240px] justify-center"
+            >
+              <Plane size={18} className="opacity-90 lg:hidden" />
+              <Plane size={20} className="opacity-90 hidden lg:block" />
+              <span>Plan trip</span>
+            </span>
+          </motion.button>
         </div>
       </motion.div>
 
@@ -197,7 +210,8 @@ export const CountryPage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 p-4 md:p-6 pb-24">
+      {/* Extra bottom padding on mobile so the fixed CTA doesn't overlap cards */}
+      <div className="relative z-10 p-4 md:p-6 pb-[140px] md:pb-28">
         {activeTab === 'cities' && (
           <motion.div 
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
@@ -208,7 +222,7 @@ export const CountryPage: React.FC = () => {
             {countryData.cities.map((city: City, index: number) => (
               <motion.button
                 key={city.name}
-                onClick={() => navigate(`/organize/${country}/${city.name}`)}
+                onClick={() => navigate(`/app/organize/${country}/${encodeURIComponent(city.name)}`)}
                 className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -258,7 +272,7 @@ export const CountryPage: React.FC = () => {
             {countryData.categories.map((category: Category, index: number) => (
               <motion.button
                 key={category.name}
-                onClick={() => navigate(`/organize/${country}/category/${category.name}`)}
+                onClick={() => navigate(`/app/organize/${country}/category/${encodeURIComponent(category.name)}`)}
                 className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -361,6 +375,25 @@ export const CountryPage: React.FC = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Mobile-only centered "Plan trip" CTA — size UNCHANGED but fully responsive width */}
+      <motion.button
+        onClick={goToQuestionnaire}
+        aria-label="Plan trip"
+        className="md:hidden fixed inset-x-4 z-50 pointer-events-auto"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)' }}
+        whileHover={{ y: -2, scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="w-full max-w-[420px] mx-auto">
+          <div className="rounded-full p-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+            <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-full text-white bg-white/5 backdrop-blur-md border border-white/10">
+              <RouteIcon size={20} />
+              <span className="text-base font-semibold">Plan trip</span>
+            </div>
+          </div>
+        </div>
+      </motion.button>
     </div>
   );
 };
